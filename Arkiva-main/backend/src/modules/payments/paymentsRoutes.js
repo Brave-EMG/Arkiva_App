@@ -6,7 +6,9 @@ import {
     getSubscriptions,
     getSubscriptionHistory,
     getCurrentSubscription,
-    feexPayWebhook
+    feexPayWebhook,
+    testPayments,
+    manualProcessPayment
 } from './paymentsController.js';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -35,6 +37,12 @@ router.get('/current-subscription', getCurrentSubscription);
 
 // Route pour récupérer l'historique des abonnements
 router.get('/history', getSubscriptionHistory);
+
+// Route de test pour vérifier les paiements
+router.get('/test-payments', testPayments);
+
+// Route pour traiter manuellement un paiement (pour les tests)
+router.post('/manual-process/:payment_id', manualProcessPayment);
 
 // Route pour choisir un abonnement (calcul du coût)
 router.post('/choose-subscription', chooseSubscription);

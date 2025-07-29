@@ -49,8 +49,12 @@ export const chooseSubscription = async (req, res) => {
   const entrepriseId = req.user.entreprise_id;
   const { subscription_id, armoires_souscrites } = req.body;
 
-  // Sécurité : vérifier que le nombre d'armoires est au moins 2
-  if (armoires_souscrites < 2) {
+  // Validation des paramètres requis
+  if (!subscription_id) {
+    return res.status(400).json({ error: "ID d'abonnement requis." });
+  }
+
+  if (!armoires_souscrites || armoires_souscrites < 2) {
     return res.status(400).json({ error: "Vous devez souscrire à au moins 2 armoires." });
   }
 
@@ -78,12 +82,11 @@ export const chooseSubscription = async (req, res) => {
     dateExpiration.setDate(dateExpiration.getDate() + abonnement.duree);
 
     // 4. Créer une entrée de paiement en attente
-    const payment_id = uuidv4();
     const paiementResult = await pool.query(
-      `INSERT INTO payments (payment_id, entreprise_id, subscription_id, montant, armoires_souscrites, statut, date_expiration)
-       VALUES ($1, $2, $3, $4, $5, $6, $7)
+      `INSERT INTO payments (entreprise_id, subscription_id, montant, armoires_souscrites, statut, date_expiration)
+       VALUES ($1, $2, $3, $4, $5, $6)
        RETURNING *`,
-      [payment_id, entrepriseId, subscription_id, montantTotal, armoires_souscrites, 'en_attente', dateExpiration]
+      [entrepriseId, subscription_id, montantTotal, armoires_souscrites, 'en_attente', dateExpiration]
     );
 
     // 5. Logger l'action
@@ -158,7 +161,9 @@ export const processPayment = async (req, res) => {
         payment_id, 
         entreprise_id: entrepriseId,
         custom_id: generatedCustomId,
-        timestamp: timestamp
+        timestamp: timestamp,
+        subscription_id: payment.subscription_id,
+        armoires_souscrites: payment.armoires_souscrites
       }),
       // Données supplémentaires pour le suivi
       payment_id: payment_id,
@@ -247,6 +252,11 @@ export const feexPayWebhook = async (req, res) => {
           : req.body.callback_info;
         custom_id = callbackInfoObj.custom_id;
         console.log('[FeexPay] custom_id extrait depuis callback_info:', custom_id);
+        
+        // Si on a le payment_id dans callback_info, on peut l'utiliser directement
+        if (callbackInfoObj.payment_id) {
+          console.log('[FeexPay] payment_id trouvé dans callback_info:', callbackInfoObj.payment_id);
+        }
       } catch (e) {
         console.error('[FeexPay] Erreur parsing callback_info:', e, req.body.callback_info);
       }
@@ -257,16 +267,52 @@ export const feexPayWebhook = async (req, res) => {
       return res.status(400).json({ error: "Custom ID manquant dans le webhook" });
     }
 
-    // Extraction du payment_id depuis custom_id
+    // Extraction du payment_id depuis custom_id ou callback_info
     let paymentId = null;
-    const match = custom_id.match(/^ARKIVA_([^_]+)_(\d+)$/);
-    if (match) {
-      paymentId = match[1];
-      const timestamp = match[2];
-      console.log(`[FeexPay] PaymentId extrait: ${paymentId}, Timestamp: ${timestamp}`);
-    } else {
-      console.error("[FeexPay] Format custom_id invalide:", custom_id);
-      return res.status(400).json({ error: "Format Custom ID invalide" });
+    
+    // D'abord, essayer d'extraire depuis callback_info
+    if (req.body.callback_info) {
+      try {
+        const callbackInfoObj = typeof req.body.callback_info === 'string'
+          ? JSON.parse(req.body.callback_info)
+          : req.body.callback_info;
+        
+        if (callbackInfoObj.payment_id) {
+          paymentId = callbackInfoObj.payment_id;
+          console.log(`[FeexPay] PaymentId extrait depuis callback_info: ${paymentId}`);
+        }
+      } catch (e) {
+        console.error('[FeexPay] Erreur parsing callback_info pour payment_id:', e);
+      }
+    }
+    
+    // Si pas trouvé dans callback_info, essayer depuis custom_id
+    if (!paymentId && custom_id) {
+      const match = custom_id.match(/^ARKIVA_([^_]+)_(\d+)$/);
+      if (match) {
+        paymentId = match[1];
+        const timestamp = match[2];
+        console.log(`[FeexPay] PaymentId extrait depuis custom_id: ${paymentId}, Timestamp: ${timestamp}`);
+      } else {
+        console.error("[FeexPay] Format custom_id invalide:", custom_id);
+      }
+    }
+    
+    // Si toujours pas trouvé, chercher le paiement en attente le plus récent
+    if (!paymentId) {
+      console.log("[FeexPay] Aucun payment_id trouvé, recherche du paiement en attente le plus récent");
+      const recentPayment = await pool.query(
+        'SELECT payment_id FROM payments WHERE statut = $1 ORDER BY created_at DESC LIMIT 1',
+        ['en_attente']
+      );
+      
+      if (recentPayment.rowCount > 0) {
+        paymentId = recentPayment.rows[0].payment_id;
+        console.log(`[FeexPay] PaymentId trouvé via recherche récente: ${paymentId}`);
+      } else {
+        console.error("[FeexPay] Aucun paiement en attente trouvé");
+        return res.status(404).json({ error: "Aucun paiement en attente trouvé" });
+      }
     }
 
     if (!paymentId) {
@@ -510,6 +556,66 @@ const sendInvoiceEmail = async (invoice, entrepriseId) => {
 
   } catch (err) {
     console.error("Erreur envoi email facture:", err);
+  }
+};
+
+// Endpoint de test pour vérifier les paiements
+export const testPayments = async (req, res) => {
+  try {
+    const result = await pool.query(
+      'SELECT payment_id, entreprise_id, subscription_id, montant, armoires_souscrites, statut, created_at, updated_at FROM payments ORDER BY created_at DESC LIMIT 10'
+    );
+    
+    res.status(200).json({
+      payments: result.rows
+    });
+  } catch (err) {
+    console.error('Erreur lors de la récupération des paiements:', err);
+    res.status(500).json({ error: 'Erreur serveur.' });
+  }
+};
+
+// Endpoint pour traiter manuellement un paiement (pour les tests)
+export const manualProcessPayment = async (req, res) => {
+  try {
+    const { payment_id } = req.params;
+    
+    // Mettre à jour le statut du paiement
+    const updateResult = await pool.query(
+      `UPDATE payments 
+       SET statut = $1, 
+           updated_at = CURRENT_TIMESTAMP
+       WHERE payment_id = $2 AND statut = 'en_attente'
+       RETURNING *`,
+      ['succès', payment_id]
+    );
+
+    if (updateResult.rowCount === 0) {
+      return res.status(404).json({ error: "Paiement non trouvé ou déjà traité" });
+    }
+
+    const payment = updateResult.rows[0];
+    
+    // Mettre à jour l'abonnement de l'entreprise
+    const entrepriseUpdate = await pool.query(
+      `UPDATE entreprises 
+       SET plan_abonnement = 'payant',
+           armoire_limit = $1,
+           date_expiration = $2,
+           updated_at = CURRENT_TIMESTAMP
+       WHERE entreprise_id = $3`,
+      [payment.armoires_souscrites, payment.date_expiration, payment.entreprise_id]
+    );
+
+    console.log(`[Manual] Paiement ${payment_id} traité avec succès`);
+    
+    res.status(200).json({
+      message: "Paiement traité avec succès",
+      payment: payment
+    });
+  } catch (err) {
+    console.error('Erreur lors du traitement manuel du paiement:', err);
+    res.status(500).json({ error: 'Erreur serveur.' });
   }
 };
 

@@ -29,6 +29,107 @@ class _EntrepriseDetailScreenState extends State<EntrepriseDetailScreen> {
     _fetchAvailableSubscriptions();
   }
 
+  // Widget helper pour les cartes d'information
+  Widget _buildInfoCard(String title, IconData icon, Color color, List<Widget> children) {
+    return Card(
+      elevation: 4,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      child: Container(
+        padding: EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: [color.withOpacity(0.05), color.withOpacity(0.02)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Container(
+                  padding: EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: color.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: Icon(icon, color: color, size: 24),
+                ),
+                SizedBox(width: 12),
+                Text(
+                  title,
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.grey[800],
+                  ),
+                ),
+              ],
+            ),
+            SizedBox(height: 16),
+            ...children,
+          ],
+        ),
+      ),
+    );
+  }
+
+  // Widget helper pour les informations de l'entreprise
+  Widget _buildEntrepriseInfo(Map<String, dynamic> entreprise) {
+    return _buildInfoCard(
+      'Informations de l\'Entreprise',
+      Icons.business,
+      Colors.blue[600]!,
+      [
+        Text(
+          entreprise['nom'] ?? 'N/A',
+          style: TextStyle(
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+            color: Colors.blue[900],
+          ),
+        ),
+        SizedBox(height: 16),
+        _buildInfoRow(Icons.email, 'Email', entreprise['email'] ?? 'N/A'),
+        SizedBox(height: 8),
+        _buildInfoRow(Icons.phone, 'Téléphone', entreprise['telephone'] ?? 'N/A'),
+        SizedBox(height: 8),
+        _buildInfoRow(Icons.location_on, 'Adresse', entreprise['adresse'] ?? 'N/A'),
+        SizedBox(height: 8),
+        _buildInfoRow(Icons.subscriptions, 'Plan d\'abonnement', entreprise['plan_abonnement'] ?? 'N/A'),
+        SizedBox(height: 8),
+        _buildInfoRow(Icons.inventory_2, 'Limite d\'armoires', entreprise['armoire_limit']?.toString() ?? 'N/A'),
+      ],
+    );
+  }
+
+  // Widget helper pour les lignes d'information
+  Widget _buildInfoRow(IconData icon, String label, String value) {
+    return Row(
+      children: [
+        Icon(icon, size: 16, color: Colors.grey[600]),
+        SizedBox(width: 8),
+        Text(
+          '$label: ',
+          style: TextStyle(
+            fontWeight: FontWeight.w500,
+            color: Colors.grey[700],
+          ),
+        ),
+        Expanded(
+          child: Text(
+            value,
+            style: TextStyle(
+              color: Colors.grey[800],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
   Future<void> _fetchEntrepriseInfo() async {
     final authStateService = Provider.of<AuthStateService>(context, listen: false);
     final entrepriseId = authStateService.entrepriseId;
@@ -65,13 +166,20 @@ class _EntrepriseDetailScreenState extends State<EntrepriseDetailScreen> {
   }
 
   Future<Map<String, dynamic>> _getCurrentSubscription(String token) async {
+    final url = '${ApiConfig.baseUrl}/api/payments/current-subscription';
+    print('🔍 [DEBUG] Current subscription - URL: $url');
+    print('🔍 [DEBUG] Token: ${token.substring(0, 10)}...');
+    
     final response = await http.get(
-      Uri.parse('${ApiConfig.baseUrl}/api/payments/current-subscription'),
+      Uri.parse(url),
       headers: {
         'Authorization': 'Bearer $token',
         'Content-Type': 'application/json',
       },
     );
+
+    print('🔍 [DEBUG] Status: ${response.statusCode}');
+    print('🔍 [DEBUG] Response body: ${response.body.substring(0, 100)}...');
 
     if (response.statusCode == 200) {
       return jsonDecode(response.body);
@@ -100,15 +208,23 @@ class _EntrepriseDetailScreenState extends State<EntrepriseDetailScreen> {
   Future<void> _chooseSubscription(int subscriptionId, int armoiresSouscrites) async {
     final authStateService = Provider.of<AuthStateService>(context, listen: false);
     final token = authStateService.token;
+    final entrepriseId = authStateService.entrepriseId;
 
-    if (token == null) {
+    if (token == null || entrepriseId == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Erreur: Token non disponible')),
+        const SnackBar(content: Text('Erreur: Token ou ID entreprise manquant')),
       );
       return;
     }
 
     try {
+      print('🔍 [DEBUG] Envoi de la requête choose-subscription...');
+      print('🔍 [DEBUG] URL: ${ApiConfig.baseUrl}/api/payments/choose-subscription');
+      print('🔍 [DEBUG] Body: ${jsonEncode({
+        'subscription_id': subscriptionId,
+        'armoires_souscrites': armoiresSouscrites,
+      })}');
+      
       final response = await http.post(
         Uri.parse('${ApiConfig.baseUrl}/api/payments/choose-subscription'),
         headers: {
@@ -120,11 +236,14 @@ class _EntrepriseDetailScreenState extends State<EntrepriseDetailScreen> {
           'armoires_souscrites': armoiresSouscrites,
         }),
       );
+      
+      print('🔍 [DEBUG] Réponse reçue - Status: ${response.statusCode}');
+      print('🔍 [DEBUG] Body: ${response.body}');
 
       if (response.statusCode == 201) {
-        final data = jsonDecode(response.body);
-        final paymentId = data['paiement']['payment_id'];
-        // Appel backend pour générer les infos FeexPay
+        final responseData = jsonDecode(response.body);
+        final paymentId = responseData['paiement']['payment_id'];
+        
         final processResponse = await http.post(
           Uri.parse('${ApiConfig.baseUrl}/api/payments/process-payment'),
           headers: {
@@ -132,105 +251,173 @@ class _EntrepriseDetailScreenState extends State<EntrepriseDetailScreen> {
             'Content-Type': 'application/json',
           },
           body: jsonEncode({
-            'payment_id': paymentId.toString(),
-            'moyen_paiement': 'mobile_money', // ou 'card' selon le cas
-            'numero_telephone': '', // tu peux demander le numéro avant si besoin
-            'custom_id': null,
+            'payment_id': paymentId,
+            'moyen_paiement': 'mobile_money',
+            'numero_telephone': '',
           }),
         );
+
         if (processResponse.statusCode == 200) {
-          final processData = jsonDecode(processResponse.body);
-          final feexpay = processData['feexpay_data'];
+          final responseData = jsonDecode(processResponse.body);
+          final feexpay = responseData['feexpay_data'];
           
-          // Logs détaillés pour tracer le custom_id
-          print('🔍 [Frontend] Réponse complète du backend:');
-          print(jsonEncode(processData));
-          
-          print('🔍 [Frontend] Données FeexPay reçues:');
-          print(jsonEncode(feexpay));
-          
-          // Utiliser uniquement le custom_id fourni par le backend
-          String? customId;
-          try {
-            // Essayer d'abord de récupérer custom_id directement
-            customId = feexpay['custom_id'];
-            
-            // Si pas trouvé, essayer de l'extraire depuis callback_info
-            if (customId == null && feexpay['callback_info'] != null) {
-              print('🔍 [Frontend] Tentative d\'extraction depuis callback_info...');
-              final callbackInfoStr = feexpay['callback_info'] as String;
-              final callbackInfoObj = jsonDecode(callbackInfoStr);
-              customId = callbackInfoObj['custom_id'];
-              print('🔍 [Frontend] custom_id extrait depuis callback_info: $customId');
-            }
-          } catch (e) {
-            print('❌ [Frontend] Erreur lors de l\'extraction du custom_id: $e');
-          }
-
-          print('🔍 [Frontend] custom_id final: $customId');
-
-          if (customId == null) {
-            print('❌ [Frontend] ERREUR: custom_id manquant dans la réponse du backend');
+          if (feexpay == null) {
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Erreur: custom_id manquant dans la réponse du backend.')),
+              SnackBar(content: Text('Erreur: Données FeexPay manquantes')),
             );
             return;
           }
           
-          final callbackInfo = {'custom_id': customId};
-          print('🔍 [Frontend] callback_info créé:');
-          print(jsonEncode(callbackInfo));
-          
-          // Ajout d'un print pour vérifier le payload transmis à FeexPay
-          print('📤 [Frontend] Payload transmis à FeexPay :');
-          final feexPayPayload = {
-            'token': feexpay['token'],
-            'id': feexpay['id'],
-            'amount': feexpay['amount'],
-            'redirecturl': feexpay['redirecturl'],
-            'trans_key': feexpay['trans_key'],
-            'callback_info': callbackInfo,
+          final callbackInfo = {
+            'subscription_id': subscriptionId,
+            'entreprise_id': entrepriseId,
+            'armoires_souscrites': armoiresSouscrites,
           };
-          print(jsonEncode(feexPayPayload));
-          
-          // Ouvre directement FeexPay
+
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => ChoicePage(
-                token: feexpay['token'],
-                id: feexpay['id'].toString(),
-                amount: feexpay['amount'].toString(),
-                redirecturl: feexpay['redirecturl'],
-                trans_key: feexpay['trans_key'].toString(),
-                callback_info: callbackInfo, // Passe un Map
+              builder: (context) => Scaffold(
+                body: SafeArea(
+                  child: Container(
+                    height: MediaQuery.of(context).size.height,
+                    child: ChoicePage(
+                      token: feexpay['token'] ?? '',
+                      id: feexpay['id']?.toString() ?? '',
+                      amount: feexpay['amount']?.toString() ?? '',
+                      redirecturl: feexpay['redirecturl'] ?? '',
+                      trans_key: feexpay['trans_key']?.toString() ?? '',
+                      callback_info: callbackInfo, // Passe un Map
+                    ),
+                  ),
+                ),
               ),
             ),
           );
         } else {
-          final errorData = jsonDecode(processResponse.body);
+          String errorMessage = 'Erreur inconnue';
+          try {
+            final errorData = jsonDecode(processResponse.body);
+            errorMessage = errorData['error'] ?? errorData['message'] ?? 'Erreur lors du traitement du paiement';
+          } catch (e) {
+            errorMessage = 'Erreur lors du traitement du paiement: ${processResponse.statusCode}';
+          }
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Erreur: ${errorData['error']}')),
+            SnackBar(content: Text(errorMessage)),
           );
         }
       } else {
-        final errorData = jsonDecode(response.body);
+        String errorMessage = 'Erreur inconnue';
+        try {
+          final errorData = jsonDecode(response.body);
+          errorMessage = errorData['error'] ?? errorData['message'] ?? 'Erreur lors du choix de l\'abonnement';
+        } catch (e) {
+          errorMessage = 'Erreur lors du choix de l\'abonnement: ${response.statusCode}';
+        }
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Erreur: ${errorData['error']}')),
+          SnackBar(content: Text(errorMessage)),
         );
       }
     } catch (e) {
+      print('Exception lors de la souscription: $e');
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Erreur: $e')),
+        SnackBar(content: Text('Erreur de connexion: $e')),
       );
     }
+  }
+
+  void _showArmoiresDialog(int subscriptionId) {
+    int selectedArmoires = 2;
+    
+    showDialog(
+      context: context,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setState) => AlertDialog(
+          title: Row(
+            children: [
+              Icon(Icons.inventory_2, color: Colors.blue[600]),
+              SizedBox(width: 8),
+              Text('Nombre d\'armoires'),
+            ],
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text('Combien d\'armoires souhaitez-vous souscrire ?'),
+              SizedBox(height: 16),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  IconButton(
+                    onPressed: () {
+                      if (selectedArmoires > 2) {
+                        setState(() {
+                          selectedArmoires--;
+                        });
+                      }
+                    },
+                    icon: Icon(Icons.remove_circle_outline),
+                  ),
+                  Container(
+                    padding: EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+                    decoration: BoxDecoration(
+                      color: Colors.blue[50],
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      '$selectedArmoires',
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.blue[700],
+                      ),
+                    ),
+                  ),
+                  IconButton(
+                    onPressed: () {
+                      setState(() {
+                        selectedArmoires++;
+                      });
+                    },
+                    icon: Icon(Icons.add_circle_outline),
+                  ),
+                ],
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text('Annuler'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.pop(context);
+                _chooseSubscription(subscriptionId, selectedArmoires);
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.blue[600],
+                foregroundColor: Colors.white,
+              ),
+              child: Text('Confirmer'),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   void _showSubscriptionDialog(List<dynamic> subscriptions) {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Choisir un abonnement'),
+        title: Row(
+          children: [
+            Icon(Icons.subscriptions, color: Colors.blue[600]),
+            SizedBox(width: 8),
+            Text('Choisir un abonnement'),
+          ],
+        ),
         content: SizedBox(
           width: double.maxFinite,
           child: ListView.builder(
@@ -239,26 +426,45 @@ class _EntrepriseDetailScreenState extends State<EntrepriseDetailScreen> {
             itemBuilder: (context, index) {
               final subscription = subscriptions[index];
               return Card(
+                elevation: 3,
+                margin: EdgeInsets.only(bottom: 8),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 child: ListTile(
-                  title: Text(subscription['nom']),
+                  contentPadding: EdgeInsets.all(16),
+                  leading: Container(
+                    padding: EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: Colors.blue[50],
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Icon(Icons.subscriptions, color: Colors.blue[600]),
+                  ),
+                  title: Text(
+                    subscription['nom'],
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
                   subtitle: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Prix: ${subscription['prix_base']} FCFA'),
-                      Text('Durée: ${subscription['duree']} jours'),
-                      Text('Armoires incluses: ${subscription['armoires_incluses']}'),
-                      Text(subscription['description'] ?? ''),
+                      SizedBox(height: 8),
+                      _buildSubscriptionInfo('Prix', '${subscription['prix_base']} FCFA', Icons.payment),
+                      _buildSubscriptionInfo('Durée', '${subscription['duree']} jours', Icons.calendar_today),
+                      _buildSubscriptionInfo('Armoires', '${subscription['armoires_incluses']}', Icons.inventory_2),
+                      if (subscription['description'] != null)
+                        _buildSubscriptionInfo('Description', subscription['description'], Icons.description),
                     ],
                   ),
                   trailing: ElevatedButton(
                     onPressed: () {
                       Navigator.pop(context);
-                      _chooseSubscription(
-                        subscription['subscription_id'],
-                        subscription['armoires_incluses'],
-                      );
+                      _showArmoiresDialog(subscription['subscription_id']);
                     },
-                    child: const Text('Choisir'),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.blue[600],
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                    ),
+                    child: Text('Choisir'),
                   ),
                 ),
               );
@@ -268,7 +474,33 @@ class _EntrepriseDetailScreenState extends State<EntrepriseDetailScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Annuler'),
+            child: Text('Annuler'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSubscriptionInfo(String label, String value, IconData icon) {
+    return Padding(
+      padding: EdgeInsets.only(bottom: 4),
+      child: Row(
+        children: [
+          Icon(icon, size: 14, color: Colors.grey[600]),
+          SizedBox(width: 4),
+          Text(
+            '$label: ',
+            style: TextStyle(
+              fontWeight: FontWeight.w500,
+              fontSize: 12,
+              color: Colors.grey[700],
+            ),
+          ),
+          Expanded(
+            child: Text(
+              value,
+              style: TextStyle(fontSize: 12, color: Colors.grey[800]),
+            ),
           ),
         ],
       ),
@@ -293,27 +525,19 @@ class _EntrepriseDetailScreenState extends State<EntrepriseDetailScreen> {
     final usage = subscriptionInfo['usage'];
     final access = subscriptionInfo['access'];
 
-    return Card(
-      margin: const EdgeInsets.only(bottom: 16),
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
+    return _buildInfoCard(
+      'État de l\'Abonnement',
+      subscription['isActive'] ? Icons.check_circle : Icons.cancel,
+      subscription['isActive'] ? Colors.green[600]! : Colors.red[600]!,
+      [
+        Row(
               children: [
                 Icon(
                   subscription['isActive'] ? Icons.check_circle : Icons.cancel,
                   color: subscription['isActive'] ? Colors.green : Colors.red,
-                ),
-                const SizedBox(width: 8),
-                Text(
-                  'État de l\'abonnement',
-                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
-              ],
+              size: 20,
             ),
-            const SizedBox(height: 12),
+            SizedBox(width: 8),
             Text(
               subscription['isActive'] ? 'Abonnement actif' : 'Aucun abonnement actif',
               style: TextStyle(
@@ -322,30 +546,32 @@ class _EntrepriseDetailScreenState extends State<EntrepriseDetailScreen> {
                 fontWeight: FontWeight.bold,
               ),
             ),
+          ],
+        ),
+        SizedBox(height: 16),
             if (subscription['expirationDate'] != null) ...[
-              const SizedBox(height: 8),
-              Text('Expire le: ${DateTime.parse(subscription['expirationDate']).toLocal().toString().split(' ')[0]}'),
+          _buildInfoRow(Icons.calendar_today, 'Expire le', DateTime.parse(subscription['expirationDate']).toLocal().toString().split(' ')[0]),
+          SizedBox(height: 8),
             ],
             if (subscription['daysUntilExpiration'] != null) ...[
-              const SizedBox(height: 8),
-              Text(
-                'Jours restants: ${subscription['daysUntilExpiration']}',
-                style: TextStyle(
-                  color: subscription['daysUntilExpiration'] < 7 ? Colors.orange : Colors.green,
-                ),
-              ),
-            ],
-            const SizedBox(height: 8),
-            Text('Armoires souscrites: ${subscription['armoiresSouscrites']}'),
-            const SizedBox(height: 12),
-            const Text(
+          _buildInfoRow(
+            Icons.timer,
+            'Jours restants',
+            '${subscription['daysUntilExpiration']}',
+          ),
+          SizedBox(height: 8),
+        ],
+        _buildInfoRow(Icons.inventory_2, 'Armoires souscrites', '${subscription['armoiresSouscrites']}'),
+        SizedBox(height: 16),
+        Text(
               'Utilisation actuelle:',
-              style: TextStyle(fontWeight: FontWeight.bold),
-            ),
-            Text('Armoires: ${usage['totalArmoires']} / ${subscription['armoiresSouscrites']}'),
-            Text('Dossiers: ${usage['totalDossiers']}'),
-            Text('Fichiers: ${usage['totalFichiers']}'),
-            const SizedBox(height: 16),
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+        ),
+        SizedBox(height: 8),
+        _buildInfoRow(Icons.inventory_2, 'Armoires', '${usage['totalArmoires']} / ${subscription['armoiresSouscrites']}'),
+        _buildInfoRow(Icons.folder, 'Dossiers', '${usage['totalDossiers']}'),
+        _buildInfoRow(Icons.description, 'Fichiers', '${usage['totalFichiers']}'),
+        SizedBox(height: 16),
             if (!subscription['isActive'])
               SizedBox(
                 width: double.infinity,
@@ -356,22 +582,22 @@ class _EntrepriseDetailScreenState extends State<EntrepriseDetailScreen> {
                       return ElevatedButton(
                         onPressed: () => _showSubscriptionDialog(snapshot.data!),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.blue,
+                      backgroundColor: Colors.blue[600],
                           foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      padding: EdgeInsets.symmetric(vertical: 12),
                         ),
-                        child: const Text('Souscrire à un abonnement'),
+                    child: Text('Souscrire à un abonnement'),
                       );
                     } else if (snapshot.hasError) {
                       return Text('Erreur: ${snapshot.error}');
                     } else {
-                      return const CircularProgressIndicator();
+                  return Center(child: CircularProgressIndicator());
                     }
                   },
                 ),
               ),
           ],
-        ),
-      ),
     );
   }
 
@@ -379,14 +605,36 @@ class _EntrepriseDetailScreenState extends State<EntrepriseDetailScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Détails de l\'Entreprise'),
+        elevation: 0,
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Colors.blue[900]!, Colors.blue[700]!],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+          ),
+        ),
+        title: Row(
+          children: [
+            Icon(Icons.business, color: Colors.white, size: 24),
+            SizedBox(width: 8),
+            Text(
+              'Détails de l\'Entreprise',
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ],
+        ),
         actions: [
           FutureBuilder<Map<String, dynamic>>(
             future: _entrepriseInfoFuture,
             builder: (context, snapshot) {
               if (snapshot.hasData && snapshot.data != null) {
                 return IconButton(
-                  icon: const Icon(Icons.edit),
+                  icon: Icon(Icons.edit, color: Colors.white),
                   onPressed: () => _navigateToEditScreen(snapshot.data!),
                   tooltip: 'Modifier l\'entreprise',
                 );
@@ -398,7 +646,7 @@ class _EntrepriseDetailScreenState extends State<EntrepriseDetailScreen> {
         ],
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
+        padding: EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -407,82 +655,94 @@ class _EntrepriseDetailScreenState extends State<EntrepriseDetailScreen> {
         future: _entrepriseInfoFuture,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          } else if (snapshot.hasError) {
-                  return Card(
-                    child: Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Text('Erreur: ${snapshot.error}'),
-                    ),
-                  );
-          } else if (!snapshot.hasData || snapshot.data == null) {
-                  return const Card(
-                    child: Padding(
-                      padding: EdgeInsets.all(16),
-                      child: Text('Aucune donnée d\'entreprise trouvée.'),
-                    ),
-                  );
-          } else {
-            final entreprise = snapshot.data!;
-                  return Card(
-                    margin: const EdgeInsets.only(bottom: 16),
-                    child: Padding(
-                      padding: const EdgeInsets.all(16),
+                  return Center(
+                    child: Card(
+                      elevation: 4,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                      child: Container(
+                        padding: EdgeInsets.all(40),
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    entreprise['nom'] ?? 'N/A',
-                    style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 16),
-                  Text('Email: ${entreprise['email'] ?? 'N/A'}'),
-                  const SizedBox(height: 8),
-                  Text('Téléphone: ${entreprise['telephone'] ?? 'N/A'}'),
-                  const SizedBox(height: 8),
-                  Text('Adresse: ${entreprise['adresse'] ?? 'N/A'}'),
-                  const SizedBox(height: 8),
-                  Text('Plan d\'abonnement: ${entreprise['plan_abonnement'] ?? 'N/A'}'),
-                  const SizedBox(height: 8),
-                  Text('Limite d\'armoires: ${entreprise['armoire_limit'] ?? 'N/A'}'),
-                        ],
+                            CircularProgressIndicator(),
+                            SizedBox(height: 16),
+                            Text('Chargement des informations...'),
+                          ],
+                        ),
                       ),
                     ),
                   );
+                } else if (snapshot.hasError) {
+                  return _buildInfoCard(
+                    'Erreur',
+                    Icons.error,
+                    Colors.red[600]!,
+                    [
+                      Text('Erreur: ${snapshot.error}'),
+                    ],
+                  );
+                } else if (!snapshot.hasData || snapshot.data == null) {
+                  return _buildInfoCard(
+                    'Aucune donnée',
+                    Icons.info,
+                    Colors.orange[600]!,
+                    [
+                      Text('Aucune donnée d\'entreprise trouvée.'),
+                    ],
+                  );
+                } else {
+                  return _buildEntrepriseInfo(snapshot.data!);
                 }
               },
             ),
+            
+            SizedBox(height: 20),
             
             // Informations d'abonnement
             FutureBuilder<Map<String, dynamic>>(
               future: _subscriptionInfoFuture,
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Card(
-                    child: Padding(
-                      padding: EdgeInsets.all(16),
-                      child: Center(child: CircularProgressIndicator()),
+                  return Center(
+                    child: Card(
+                      elevation: 4,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                      child: Container(
+                        padding: EdgeInsets.all(40),
+                        child: Column(
+                          children: [
+                            CircularProgressIndicator(),
+                            SizedBox(height: 16),
+                            Text('Chargement de l\'abonnement...'),
+                          ],
+                        ),
+                      ),
                     ),
                   );
                 } else if (snapshot.hasError) {
-                  return Card(
-                    child: Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Text('Erreur abonnement: ${snapshot.error}'),
-                    ),
+                  return _buildInfoCard(
+                    'Erreur Abonnement',
+                    Icons.error,
+                    Colors.red[600]!,
+                    [
+                      Text('Erreur abonnement: ${snapshot.error}'),
+                    ],
                   );
                 } else if (snapshot.hasData) {
                   return _buildSubscriptionCard(snapshot.data!);
                 } else {
-                  return const Card(
-                    child: Padding(
-                      padding: EdgeInsets.all(16),
-                      child: Text('Aucune information d\'abonnement disponible.'),
-              ),
+                  return _buildInfoCard(
+                    'Aucun Abonnement',
+                    Icons.info,
+                    Colors.orange[600]!,
+                    [
+                      Text('Aucune information d\'abonnement disponible.'),
+                    ],
             );
           }
         },
             ),
+            
+            SizedBox(height: 30),
           ],
         ),
       ),
