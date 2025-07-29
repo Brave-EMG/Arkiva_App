@@ -30,6 +30,26 @@ class ResponsiveService {
     return MediaQuery.of(context).size.height;
   }
 
+  static double getSpacing(BuildContext context, {required double baseSpacing}) {
+    if (isMobile(context)) {
+      return baseSpacing;
+    } else if (isTablet(context)) {
+      return baseSpacing * 1.2;
+    } else {
+      return baseSpacing * 1.5;
+    }
+  }
+
+  static double getImageSize(BuildContext context, {required double baseSize}) {
+    if (isMobile(context)) {
+      return baseSize;
+    } else if (isTablet(context)) {
+      return baseSize * 1.2;
+    } else {
+      return baseSize * 1.5;
+    }
+  }
+
   static double getPadding(BuildContext context) {
     if (isMobile(context)) return 16.0;
     if (isTablet(context)) return 24.0;

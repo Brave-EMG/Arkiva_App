@@ -4,11 +4,11 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 
 class ApiConfig {
   static String get baseUrl {
-    if (kIsWeb) {
+    //if (kIsWeb) {
       return 'http://localhost:3000';
-    } else {
-      return 'http://192.168.1.147:3000';
-    }
+    // } else {
+    //   return 'http://192.168.1.147:3000';
+    // }
   }
 
   static Future<Map<String, String>> getHeaders() async {

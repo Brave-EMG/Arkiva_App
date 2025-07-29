@@ -125,7 +125,7 @@ class WelcomeScreen extends StatelessWidget {
                         ],
                       ),
                     ),
-                    const Spacer(),
+                    const SizedBox(height: 40),
                     // Boutons
                     Column(
                       children: [
