@@ -5,7 +5,6 @@ import 'package:arkiva/services/auth_service.dart';
 import 'package:arkiva/services/auth_state_service.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
-import 'dart:async';
 import 'package:arkiva/config/api_config.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -38,103 +37,28 @@ class _LoginScreenState extends State<LoginScreen> {
 
   Future<void> _login() async {
     setState(() { _isLoading = true; _errorMsg = null; });
-    
-    late final http.Response response;
-    late final Map<String, dynamic> data;
-    
-    try {
-      final url = '${ApiConfig.baseUrl}/api/auth/login';
-      debugPrint('📡 Tentative de connexion à $url');
-      debugPrint('📧 Email: ${_emailController.text.trim()}');
-      
-      // Vérifier si le serveur est accessible
-      try {
-        final pingResponse = await http.get(Uri.parse(ApiConfig.baseUrl))
-            .timeout(const Duration(seconds: 5));
-        debugPrint('🔍 Ping serveur: ${pingResponse.statusCode}');
-      } catch (e) {
-        debugPrint('❌ Erreur ping serveur: $e');
-        throw Exception('Serveur inaccessible: $e');
-      }
-      
-      response = await http.post(
-        Uri.parse(url),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({
-          'email': _emailController.text.trim(),
-          'password': _passwordController.text.trim(),
-        }),
-      ).timeout(
-        const Duration(seconds: 30), // Augmenté à 30 secondes
-        onTimeout: () {
-          debugPrint('⏰ Délai d\'attente dépassé après 30 secondes');
-          throw TimeoutException('La connexion au serveur a pris trop de temps');
-        },
+    final response = await http.post(
+      Uri.parse('${ApiConfig.baseUrl}/api/auth/login'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({
+        'email': _emailController.text.trim(),
+        'password': _passwordController.text.trim(),
+      }),
       );
-      
-      debugPrint('📡 Réponse reçue avec le statut: ${response.statusCode}');
-      data = jsonDecode(response.body);
-      debugPrint('📡 Réponse décodée: ${response.body}');
-    } catch (e) {
-      debugPrint('❌ Erreur lors de la connexion: $e');
-      String errorMessage;
-      
-      if (e.toString().contains('SocketException')) {
-        debugPrint('🔌 Erreur de socket: Impossible de se connecter au serveur');
-        errorMessage = 'Impossible de se connecter au serveur. Vérifiez que:\n'
-            '- Le serveur backend est en cours d\'exécution\n'
-            '- Le port 3000 est accessible\n'
-            '- Votre appareil est connecté au réseau';
-      } else if (e.toString().contains('TimeoutException')) {
-        debugPrint('⏰ Erreur de timeout: Le serveur ne répond pas');
-        errorMessage = 'Le serveur ne répond pas. Vérifiez que:\n'
-            '- Le serveur backend est en cours d\'exécution\n'
-            '- Le serveur n\'est pas surchargé';
-      } else if (e.toString().contains('Serveur inaccessible')) {
-        debugPrint('🔒 Erreur d\'accès: Serveur inaccessible');
-        errorMessage = 'Le serveur est inaccessible. Vérifiez que:\n'
-            '- Le serveur est démarré sur le port 3000\n'
-            '- Votre pare-feu autorise les connexions';
-      } else {
-        debugPrint('❓ Erreur inconnue: $e');
-        errorMessage = 'Une erreur inattendue est survenue: $e';
-      }
-      
-      setState(() {
-        _errorMsg = errorMessage;
-        _isLoading = false;
-      });
-      
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(errorMessage),
-          backgroundColor: Colors.red,
-          duration: const Duration(seconds: 5),
-          action: SnackBarAction(
-            label: 'OK',
-            textColor: Colors.white,
-            onPressed: () {
-              ScaffoldMessenger.of(context).hideCurrentSnackBar();
-            },
-          ),
-        ),
-      );
-      
-      return;
-    }
-
+    final data = jsonDecode(response.body);
+    print('Réponse backend : ${response.body}'); // Log la réponse brute
     if (response.statusCode == 200) {
-      final user = data['user'] as Map<String, dynamic>?;
+      final user = data['user'];
       if (user == null || user['user_id'] == null || user['role'] == null) {
         setState(() {
           _errorMsg = "Réponse du serveur incomplète. Veuillez contacter l'administrateur.";
           _isLoading = false;
         });
-        debugPrint('❌ Réponse inattendue : $data');
+        print('Réponse inattendue : $data');
         return;
       }
-      _token = data['token'] as String;
-      _userId = user['user_id'] as int;
+      _token = data['token'];
+      _userId = user['user_id'];
       if (user['two_factor_enabled'] == true) {
         setState(() { _show2FA = true; });
         // Optionnel : renvoyer un code à chaque tentative de login
@@ -148,8 +72,8 @@ class _LoginScreenState extends State<LoginScreen> {
         );
       } else {
         // Connexion normale
-        final authStateService = context.read<AuthStateService>();
-        await authStateService.setAuthState(
+      final authStateService = context.read<AuthStateService>();
+      await authStateService.setAuthState(
           _token!,
           _userId!.toString(),
         );
@@ -158,10 +82,10 @@ class _LoginScreenState extends State<LoginScreen> {
         final entrepriseId = userInfo['entreprise_id'];
         if (!mounted) return;
         if (userRole == 'admin' && (entrepriseId == 0 || entrepriseId == null)) {
-          debugPrint('✅ Admin connecté sans entreprise, redirection vers la création d\'entreprise.');
+          print('✅ Admin connecté sans entreprise, redirection vers la création d\'entreprise.');
           Navigator.of(context).pushReplacementNamed('/create-entreprise');
         } else {
-          debugPrint('✅ Utilisateur connecté (Admin avec entreprise ou autre rôle), redirection vers l\'accueil.');
+          print('✅ Utilisateur connecté (Admin avec entreprise ou autre rôle), redirection vers l\'accueil.');
           Navigator.of(context).pushReplacementNamed('/home');
         }
       }

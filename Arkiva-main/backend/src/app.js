@@ -39,19 +39,7 @@ import fileManagerRoutes from './modules/MergeFile/fileManageRoute.js'; // gesti
 
 const app = express();
 
-// Configuration CORS
-app.use(cors({
-  origin: [
-    'http://localhost:3000', 
-    'http://10.0.2.2:3000', 
-    'http://192.168.100.112:3000',
-    'http://192.168.100.112',
-    '*'
-  ],
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-  credentials: true
-}));
+app.use(cors());
 
 // Parsers JSON/urlencoded AVANT les routes qui attendent du JSON
 app.use(express.json({ limit: '50mb' }));
@@ -101,4 +89,4 @@ app.listen(PORT, '0.0.0.0', () => {
   cleanupCron.start();
 });
 
-export default app; 
+export default app;

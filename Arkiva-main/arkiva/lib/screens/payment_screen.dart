@@ -327,4 +327,27 @@ class _PaymentScreenState extends State<PaymentScreen> {
   }
 }
 
-// End of file
+// Page de succès
+class PaymentSuccessScreen extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    // Redirection automatique vers l'accueil après un court délai
+    Future.delayed(const Duration(seconds: 2), () {
+      Navigator.of(context).pushReplacementNamed('/home');
+    });
+    return Scaffold(
+      body: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: const [
+            Icon(Icons.check_circle, color: Colors.green, size: 80),
+            SizedBox(height: 24),
+            Text('Paiement réussi !', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+            SizedBox(height: 16),
+            Text('Redirection vers l\'accueil...'),
+          ],
+        ),
+      ),
+    );
+  }
+} 

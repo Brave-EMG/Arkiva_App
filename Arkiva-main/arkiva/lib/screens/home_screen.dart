@@ -18,11 +18,11 @@ import 'package:arkiva/screens/tags_screen.dart';
 import 'package:arkiva/services/search_service.dart';
 import 'package:arkiva/services/tag_service.dart';
 import 'package:arkiva/screens/fichier_view_screen.dart';
+import 'package:arkiva/services/responsive_service.dart';
 import 'package:http/http.dart' as http;
 import 'package:arkiva/services/http_interceptor.dart';
 import 'dart:convert';
 import 'package:arkiva/config/api_config.dart';
-import 'package:arkiva/services/responsive_service.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -84,50 +84,57 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _buildStatCard(String title, String value, IconData icon, Color color) {
     return ResponsiveService.responsiveCard(
       context: context,
-      child: Column(
-        children: [
-          Icon(icon, size: ResponsiveService.getIconSize(context), color: color),
-          SizedBox(height: ResponsiveService.getPadding(context) * 0.5),
-          Text(value, 
-            style: TextStyle(
-              fontSize: ResponsiveService.getFontSize(context, baseSize: 20), 
-              fontWeight: FontWeight.bold
-            )),
-          Text(title, 
-            style: TextStyle(
-              fontSize: ResponsiveService.getFontSize(context, baseSize: 12), 
-              color: Colors.grey[600]
-            )),
-        ],
+      elevation: 4,
+      child: Container(
+        padding: EdgeInsets.all(ResponsiveService.getCardPadding(context)),
+        child: Column(
+          children: [
+            Icon(icon, size: ResponsiveService.getIconSize(context) * 1.6, color: color),
+            SizedBox(height: ResponsiveService.getSpacing(context, baseSpacing: 8)),
+            Text(value, 
+              style: TextStyle(
+                fontSize: ResponsiveService.getFontSize(context, baseSize: 24), 
+                fontWeight: FontWeight.bold
+              )),
+            Text(title, 
+              style: TextStyle(
+                fontSize: ResponsiveService.getFontSize(context, baseSize: 14), 
+                color: Colors.grey[600]
+              )),
+          ],
+        ),
       ),
     );
   }
 
   // Widget helper pour les cartes d'action
   Widget _buildActionCard(String title, IconData icon, Color color, VoidCallback onTap) {
-    return Card(
+    return ResponsiveService.responsiveCard(
+      context: context,
       elevation: 6,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(ResponsiveService.getBorderRadius(context)),
         child: Container(
-          padding: EdgeInsets.all(20),
+          padding: EdgeInsets.all(ResponsiveService.getCardPadding(context)),
           decoration: BoxDecoration(
             gradient: LinearGradient(
               colors: [color.withOpacity(0.1), color.withOpacity(0.05)],
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(ResponsiveService.getBorderRadius(context)),
           ),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(icon, size: 40, color: color),
-              SizedBox(height: 12),
+              Icon(icon, size: ResponsiveService.getIconSize(context) * 2, color: color),
+              SizedBox(height: ResponsiveService.getSpacing(context, baseSpacing: 12)),
               Text(title, 
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                style: TextStyle(
+                  fontSize: ResponsiveService.getFontSize(context, baseSize: 16), 
+                  fontWeight: FontWeight.bold
+                )),
             ],
           ),
         ),
@@ -137,19 +144,18 @@ class _HomeScreenState extends State<HomeScreen> {
 
   // Widget helper pour les cartes d'accès rapide
   Widget _buildQuickAccessCard(String title, IconData icon, Color color, String subtitle, VoidCallback onTap) {
-    return Card(
+    return ResponsiveService.responsiveCard(
+      context: context,
       elevation: 3,
-      margin: EdgeInsets.only(bottom: 12),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: ListTile(
-        contentPadding: EdgeInsets.all(16),
+        contentPadding: EdgeInsets.all(ResponsiveService.getCardPadding(context)),
         leading: Container(
-          padding: EdgeInsets.all(8),
+          padding: EdgeInsets.all(ResponsiveService.getSpacing(context, baseSpacing: 8)),
           decoration: BoxDecoration(
             color: color.withOpacity(0.1),
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.circular(ResponsiveService.getBorderRadius(context)),
           ),
-          child: Icon(icon, color: color, size: 24),
+          child: Icon(icon, color: color, size: ResponsiveService.getIconSize(context)),
         ),
         title: Text(title, style: TextStyle(fontWeight: FontWeight.bold)),
         subtitle: Text(subtitle, style: TextStyle(fontSize: 12)),
@@ -335,19 +341,12 @@ class _HomeScreenState extends State<HomeScreen> {
         final cheminAffiche = doc['chemin'] ??
           [doc['armoire_nom'] ?? doc['armoire'], doc['casier_nom'] ?? doc['casier'], doc['dossier_nom'] ?? doc['dossier']]
             .where((e) => e != null && e.toString().isNotEmpty).join(' > ');
-        return ResponsiveService.responsiveCard(
-          context: context,
-          padding: EdgeInsets.all(ResponsiveService.getCardPadding(context)),
+        return Card(
+          margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 0),
           child: ListTile(
-            leading: Icon(Icons.description, size: ResponsiveService.getIconSize(context)),
-            title: Text(
-              nomAffiche,
-              style: TextStyle(fontSize: ResponsiveService.getFontSize(context, baseSize: 14)),
-            ),
-            subtitle: Text(
-              cheminAffiche,
-              style: TextStyle(fontSize: ResponsiveService.getFontSize(context, baseSize: 12)),
-            ),
+            leading: const Icon(Icons.description),
+            title: Text(nomAffiche),
+            subtitle: Text(cheminAffiche),
             onTap: () {
               Navigator.of(context).push(
                 MaterialPageRoute(
@@ -367,17 +366,10 @@ class _HomeScreenState extends State<HomeScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text(
-          'Résultats pour "${_quickSearchController.text}"',
-          style: TextStyle(fontSize: ResponsiveService.getFontSize(context, baseSize: 16)),
-        ),
+        title: Text('Résultats pour "${_quickSearchController.text}"'),
         content: SizedBox(
-          width: ResponsiveService.isMobile(context) 
-            ? MediaQuery.of(context).size.width * 0.9 
-            : 400,
-          height: ResponsiveService.isMobile(context) 
-            ? MediaQuery.of(context).size.height * 0.6 
-            : 400,
+          width: 400,
+          height: 400,
           child: _quickResults.isEmpty
               ? const Text('Aucun document trouvé')
               : ListView.builder(
@@ -390,15 +382,9 @@ class _HomeScreenState extends State<HomeScreen> {
                     final dossier = doc['dossier'] ?? '';
                     final cheminAffiche = [armoire, casier, dossier].where((e) => e != null && e.toString().isNotEmpty).join(' > ');
                     return ListTile(
-                      leading: Icon(Icons.description, size: ResponsiveService.getIconSize(context)),
-                      title: Text(
-                        nomAffiche,
-                        style: TextStyle(fontSize: ResponsiveService.getFontSize(context, baseSize: 14)),
-                      ),
-                      subtitle: Text(
-                        cheminAffiche,
-                        style: TextStyle(fontSize: ResponsiveService.getFontSize(context, baseSize: 12)),
-                      ),
+                      leading: const Icon(Icons.description),
+                      title: Text(nomAffiche),
+                      subtitle: Text(cheminAffiche),
                       onTap: () {
                         Navigator.pop(context); // Fermer le dialog
                         Navigator.of(context).push(
@@ -412,13 +398,9 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
         ),
         actions: [
-          ResponsiveService.responsiveButton(
-            context: context,
+          TextButton(
             onPressed: () => Navigator.pop(context),
-            child: Text(
-              'Fermer',
-              style: TextStyle(fontSize: ResponsiveService.getFontSize(context, baseSize: 14)),
-            ),
+            child: const Text('Fermer'),
           ),
         ],
       ),
@@ -775,25 +757,25 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
         title: Row(
           children: [
-            Icon(Icons.archive, color: Colors.white, size: 28),
-            SizedBox(width: 12),
+            Icon(Icons.archive, color: Colors.white, size: ResponsiveService.getIconSize(context) * 1.4),
+            SizedBox(width: ResponsiveService.getSpacing(context, baseSpacing: 12)),
             Text('ARKIVA', style: TextStyle(
               fontWeight: FontWeight.bold, 
-              fontSize: 24,
+              fontSize: ResponsiveService.getFontSize(context, baseSize: 24),
               color: Colors.white
             )),
           ],
         ),
         actions: [
           IconButton(
-            icon: Icon(Icons.settings, color: Colors.white),
+            icon: Icon(Icons.settings, color: Colors.white, size: ResponsiveService.getIconSize(context)),
             onPressed: () {
               _navigateToScreen(context, const SettingsScreen());
             },
             tooltip: 'Paramètres',
           ),
           IconButton(
-            icon: Icon(Icons.logout, color: Colors.white),
+            icon: Icon(Icons.logout, color: Colors.white, size: ResponsiveService.getIconSize(context)),
             onPressed: () async {
               await context.read<AuthStateService>().clearAuthState();
               Navigator.of(context).pushAndRemoveUntil(
@@ -806,44 +788,51 @@ class _HomeScreenState extends State<HomeScreen> {
         ],
       ),
       body: SingleChildScrollView(
+        padding: ResponsiveService.getScreenPadding(context),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Section d'accueil modernisée
             Container(
-              padding: EdgeInsets.all(20),
+              padding: ResponsiveService.getScreenPadding(context),
               child: Column(
                 children: [
                   // Card de salutation avec avatar
-                  Card(
+                  ResponsiveService.responsiveCard(
+                    context: context,
                     elevation: 8,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
                     child: Container(
-                      padding: EdgeInsets.all(24),
+                      padding: ResponsiveService.getScreenPadding(context),
                       decoration: BoxDecoration(
                         gradient: LinearGradient(
                           colors: [Colors.blue[50]!, Colors.blue[100]!],
                           begin: Alignment.topLeft,
                           end: Alignment.bottomRight,
                         ),
-                        borderRadius: BorderRadius.circular(20),
+                        borderRadius: BorderRadius.circular(ResponsiveService.getBorderRadius(context)),
                       ),
                       child: Row(
                         children: [
                           CircleAvatar(
-                            radius: 30,
+                            radius: ResponsiveService.getImageSize(context, baseSize: 30),
                             backgroundColor: Colors.blue[600],
-                            child: Icon(Icons.person, color: Colors.white, size: 30),
+                            child: Icon(Icons.person, color: Colors.white, size: ResponsiveService.getIconSize(context)),
                           ),
-                          SizedBox(width: 16),
+                          SizedBox(width: ResponsiveService.getSpacing(context, baseSpacing: 16)),
                           Expanded(
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Text('Bonjour $username !', 
-                                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+                                  style: TextStyle(
+                                    fontSize: ResponsiveService.getFontSize(context, baseSize: 24), 
+                                    fontWeight: FontWeight.bold
+                                  )),
                                 Text('Prêt à organiser vos documents ?',
-                                  style: TextStyle(fontSize: 16, color: Colors.grey[600])),
+                                  style: TextStyle(
+                                    fontSize: ResponsiveService.getFontSize(context, baseSize: 16), 
+                                    color: Colors.grey[600]
+                                  )),
                               ],
                             ),
                           ),
@@ -853,64 +842,90 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                   
                   // Cards de statistiques
-                  SizedBox(height: 16),
-                  ResponsiveService.responsiveGrid(
+                  SizedBox(height: ResponsiveService.getSpacing(context, baseSpacing: 16)),
+                  ResponsiveService.responsiveBuilder(
                     context: context,
-                    children: [
-                      _buildStatCard(
-                        'Armoires', 
-                        '${authStateService.armoireCount ?? 0}', 
-                        Icons.inventory_2, 
-                        Colors.blue[600]!
-                      ),
-                      _buildStatCard(
-                        'Casiers', 
-                        '${authStateService.casierCount ?? 0}', 
-                        Icons.folder, 
-                        Colors.green[600]!
-                      ),
-                    ],
-                    mobileCrossAxisCount: 2,
-                    tabletCrossAxisCount: 2,
-                    desktopCrossAxisCount: 2,
+                    mobile: Column(
+                      children: [
+                        _buildStatCard(
+                          'Armoires', 
+                          '${authStateService.armoireCount ?? 0}', 
+                          Icons.inventory_2, 
+                          Colors.blue[600]!
+                        ),
+                        SizedBox(height: ResponsiveService.getSpacing(context, baseSpacing: 12)),
+                        _buildStatCard(
+                          'Casiers', 
+                          '${authStateService.casierCount ?? 0}', 
+                          Icons.folder, 
+                          Colors.green[600]!
+                        ),
+                      ],
+                    ),
+                    desktop: Row(
+                      children: [
+                        Expanded(
+                          child: _buildStatCard(
+                            'Armoires', 
+                            '${authStateService.armoireCount ?? 0}', 
+                            Icons.inventory_2, 
+                            Colors.blue[600]!
+                          ),
+                        ),
+                        SizedBox(width: ResponsiveService.getSpacing(context, baseSpacing: 12)),
+                        Expanded(
+                          child: _buildStatCard(
+                            'Casiers', 
+                            '${authStateService.casierCount ?? 0}', 
+                            Icons.folder, 
+                            Colors.green[600]!
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                   
                   // Bouton admin si nécessaire
                   if (userRole == 'admin')
                     Padding(
-                      padding: const EdgeInsets.only(top: 16.0),
-                      child: ElevatedButton.icon(
+                      padding: EdgeInsets.only(top: ResponsiveService.getSpacing(context, baseSpacing: 16.0)),
+                      child: ResponsiveService.responsiveButton(
+                        context: context,
                         onPressed: () {
                           _navigateToScreen(context, const EntrepriseDetailScreen());
                         },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.blueGrey[700],
-                          foregroundColor: Colors.white,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          padding: EdgeInsets.symmetric(horizontal: 20, vertical: 14),
-                          elevation: 4,
+                        backgroundColor: Colors.blueGrey[700],
+                        foregroundColor: Colors.white,
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.business, color: Colors.white, size: ResponsiveService.getIconSize(context)),
+                            SizedBox(width: ResponsiveService.getSpacing(context, baseSpacing: 8)),
+                            Text('Voir infos entreprise', 
+                              style: TextStyle(fontSize: ResponsiveService.getFontSize(context, baseSize: 16))),
+                          ],
                         ),
-                        icon: Icon(Icons.business, color: Colors.white),
-                        label: Text('Voir infos entreprise', style: TextStyle(fontSize: 16)),
                       ),
                     ),
                 ],
               ),
             ),
 
-            SizedBox(height: 20),
+            SizedBox(height: ResponsiveService.getSpacing(context, baseSpacing: 20)),
 
             // Section Armoires
             Container(
-              padding: EdgeInsets.symmetric(horizontal: 20),
+              padding: ResponsiveService.getHorizontalPadding(context),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text('Armoires', 
-                    style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.blue[900])),
-                  SizedBox(height: 16),
+                    style: TextStyle(
+                      fontSize: ResponsiveService.getFontSize(context, baseSize: 22), 
+                      fontWeight: FontWeight.bold, 
+                      color: Colors.blue[900]
+                    )),
+                  SizedBox(height: ResponsiveService.getSpacing(context, baseSpacing: 16)),
                   _buildActionCard('Armoires', Icons.inventory_2, Colors.orange[600]!, () {
                     final authStateService = context.read<AuthStateService>();
                     final entrepriseId = authStateService.entrepriseId;
@@ -936,80 +951,111 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
 
-            SizedBox(height: 30),
+            SizedBox(height: ResponsiveService.getSpacing(context, baseSpacing: 30)),
 
             // Section Recherche Améliorée
             Container(
-              padding: EdgeInsets.symmetric(horizontal: 20),
-              child: Card(
+              padding: ResponsiveService.getHorizontalPadding(context),
+              child: ResponsiveService.responsiveCard(
+                context: context,
                 elevation: 4,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                 child: Container(
-                  padding: EdgeInsets.all(20),
+                  padding: ResponsiveService.getScreenPadding(context),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Row(
                         children: [
-                          Icon(Icons.search, color: Colors.blue[600], size: 24),
-                          SizedBox(width: 8),
+                          Icon(Icons.search, color: Colors.blue[600], size: ResponsiveService.getIconSize(context)),
+                          SizedBox(width: ResponsiveService.getSpacing(context, baseSpacing: 8)),
                           Text('Recherche Rapide', 
-                            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                            style: TextStyle(
+                              fontSize: ResponsiveService.getFontSize(context, baseSize: 18), 
+                              fontWeight: FontWeight.bold
+                            )),
                         ],
                       ),
-                      SizedBox(height: 16),
-                      TextField(
+                      SizedBox(height: ResponsiveService.getSpacing(context, baseSpacing: 16)),
+                      ResponsiveService.responsiveTextField(
+                        context: context,
                         controller: _quickSearchController,
-                        decoration: InputDecoration(
-                          hintText: 'Rechercher un document...',
-                          prefixIcon: Icon(Icons.search),
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          filled: true,
-                          fillColor: Colors.grey[50],
-                        ),
-                        onSubmitted: (text) => _performQuickSearch(),
+                        labelText: 'Rechercher un document...',
+                        prefixIcon: Icon(Icons.search, size: ResponsiveService.getIconSize(context)),
+                        onChanged: (text) => _performQuickSearch(),
                       ),
-                      SizedBox(height: 12),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: ResponsiveService.responsiveButton(
+                      SizedBox(height: ResponsiveService.getSpacing(context, baseSpacing: 12)),
+                      ResponsiveService.responsiveBuilder(
+                        context: context,
+                        mobile: Column(
+                          children: [
+                            ResponsiveService.responsiveButton(
                               context: context,
                               onPressed: _showMultiSelectFilters,
+                              backgroundColor: Colors.blue[50],
+                              foregroundColor: Colors.blue[700],
                               child: Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
                                   Icon(Icons.tune, size: ResponsiveService.getIconSize(context)),
-                                  SizedBox(width: 8),
-                                  Text(
-                                    'Filtres',
-                                    style: TextStyle(fontSize: ResponsiveService.getFontSize(context, baseSize: 14)),
-                                  ),
+                                  SizedBox(width: ResponsiveService.getSpacing(context, baseSpacing: 8)),
+                                  Text('Filtres', style: TextStyle(fontSize: ResponsiveService.getFontSize(context, baseSize: 14))),
                                 ],
                               ),
                             ),
-                          ),
-                          SizedBox(width: 12),
-                          Expanded(
-                            child: ResponsiveService.responsiveButton(
+                            SizedBox(height: ResponsiveService.getSpacing(context, baseSpacing: 8)),
+                            ResponsiveService.responsiveButton(
                               context: context,
                               onPressed: _performQuickSearch,
+                              backgroundColor: Colors.blue[600],
+                              foregroundColor: Colors.white,
                               child: Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
                                   Icon(Icons.search, size: ResponsiveService.getIconSize(context)),
-                                  SizedBox(width: 8),
-                                  Text(
-                                    'Rechercher',
-                                    style: TextStyle(fontSize: ResponsiveService.getFontSize(context, baseSize: 14)),
-                                  ),
+                                  SizedBox(width: ResponsiveService.getSpacing(context, baseSpacing: 8)),
+                                  Text('Rechercher', style: TextStyle(fontSize: ResponsiveService.getFontSize(context, baseSize: 14))),
                                 ],
                               ),
                             ),
-                          ),
-                        ],
+                          ],
+                        ),
+                        desktop: Row(
+                          children: [
+                            Expanded(
+                              child: ResponsiveService.responsiveButton(
+                                context: context,
+                                onPressed: _showMultiSelectFilters,
+                                backgroundColor: Colors.blue[50],
+                                foregroundColor: Colors.blue[700],
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(Icons.tune, size: ResponsiveService.getIconSize(context)),
+                                    SizedBox(width: ResponsiveService.getSpacing(context, baseSpacing: 8)),
+                                    Text('Filtres', style: TextStyle(fontSize: ResponsiveService.getFontSize(context, baseSize: 14))),
+                                  ],
+                                ),
+                              ),
+                            ),
+                            SizedBox(width: ResponsiveService.getSpacing(context, baseSpacing: 12)),
+                            Expanded(
+                              child: ResponsiveService.responsiveButton(
+                                context: context,
+                                onPressed: _performQuickSearch,
+                                backgroundColor: Colors.blue[600],
+                                foregroundColor: Colors.white,
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(Icons.search, size: ResponsiveService.getIconSize(context)),
+                                    SizedBox(width: ResponsiveService.getSpacing(context, baseSpacing: 8)),
+                                    Text('Rechercher', style: TextStyle(fontSize: ResponsiveService.getFontSize(context, baseSize: 14))),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                       // Affichage des résultats sous la barre de recherche
                       _buildQuickResultsList(),
@@ -1019,17 +1065,21 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
 
-            SizedBox(height: 30),
+            SizedBox(height: ResponsiveService.getSpacing(context, baseSpacing: 30)),
 
             // Section Accès Rapide Modernisée
             Container(
-              padding: EdgeInsets.symmetric(horizontal: 20),
+              padding: ResponsiveService.getHorizontalPadding(context),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text('Accès Rapide', 
-                    style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold, color: Colors.blue[900])),
-                  SizedBox(height: 16),
+                    style: TextStyle(
+                      fontSize: ResponsiveService.getFontSize(context, baseSize: 22), 
+                      fontWeight: FontWeight.bold, 
+                      color: Colors.blue[900]
+                    )),
+                  SizedBox(height: ResponsiveService.getSpacing(context, baseSpacing: 16)),
                   _buildQuickAccessCard(
                     'Favoris', 
                     Icons.star, 
