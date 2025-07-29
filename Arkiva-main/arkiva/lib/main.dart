@@ -15,6 +15,11 @@ import 'package:arkiva/screens/backups_screen.dart';
 import 'package:arkiva/screens/admin_dashboard_screen.dart';
 import 'package:arkiva/screens/responsive_test_screen.dart';
 import 'package:arkiva/screens/welcome_screen.dart';
+import 'package:arkiva/screens/upload_screen.dart';
+import 'package:arkiva/screens/versions_screen.dart';
+import 'package:arkiva/screens/restorations_screen.dart';
+import 'package:arkiva/screens/payment_screen.dart';
+import 'package:arkiva/screens/payment_success_screen.dart';
 import 'package:arkiva/services/auth_state_service.dart';
 import 'package:arkiva/services/armoire_service.dart';
 import 'package:arkiva/services/casier_service.dart';
@@ -23,6 +28,7 @@ import 'package:arkiva/services/fichier_service.dart';
 import 'package:arkiva/services/backup_service.dart';
 import 'package:arkiva/services/admin_service.dart';
 import 'package:arkiva/services/responsive_service.dart';
+import 'package:arkiva/services/theme_service.dart';
 
 void main() {
   runApp(
@@ -62,11 +68,14 @@ class ArkivaApp extends StatelessWidget {
         '/versions': (context) => const VersionsScreen(),
         '/restorations': (context) => const RestorationsScreen(),
         '/responsive-test': (context) => const ResponsiveTestScreen(),
-        '/payment': (context) => PaymentScreen(
-          paymentId: '1', // ID de test
-          authToken: 'your_test_token_here', // Token de test
-        ),
-        '/payment-success': (context) => PaymentSuccessScreen(),
+        '/payment': (context) {
+          final args = ModalRoute.of(context)!.settings.arguments as Map<String, String>;
+          return PaymentScreen(
+            paymentId: args['paymentId'] ?? '',
+            authToken: args['authToken'] ?? '',
+          );
+        },
+        '/payment-success': (context) => const PaymentSuccessScreen(),
       },
       builder: (context, child) {
         return MediaQuery(
