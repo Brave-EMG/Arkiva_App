@@ -22,6 +22,7 @@ import 'package:http/http.dart' as http;
 import 'package:arkiva/services/http_interceptor.dart';
 import 'dart:convert';
 import 'package:arkiva/config/api_config.dart';
+import 'package:arkiva/services/responsive_service.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -81,21 +82,23 @@ class _HomeScreenState extends State<HomeScreen> {
 
   // Widget helper pour les cartes de statistiques
   Widget _buildStatCard(String title, String value, IconData icon, Color color) {
-    return Card(
-      elevation: 4,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      child: Container(
-        padding: EdgeInsets.all(16),
-        child: Column(
-          children: [
-            Icon(icon, size: 32, color: color),
-            SizedBox(height: 8),
-            Text(value, 
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
-            Text(title, 
-              style: TextStyle(fontSize: 14, color: Colors.grey[600])),
-          ],
-        ),
+    return ResponsiveService.responsiveCard(
+      context: context,
+      child: Column(
+        children: [
+          Icon(icon, size: ResponsiveService.getIconSize(context), color: color),
+          SizedBox(height: ResponsiveService.getPadding(context) * 0.5),
+          Text(value, 
+            style: TextStyle(
+              fontSize: ResponsiveService.getFontSize(context, baseSize: 20), 
+              fontWeight: FontWeight.bold
+            )),
+          Text(title, 
+            style: TextStyle(
+              fontSize: ResponsiveService.getFontSize(context, baseSize: 12), 
+              color: Colors.grey[600]
+            )),
+        ],
       ),
     );
   }
@@ -332,12 +335,19 @@ class _HomeScreenState extends State<HomeScreen> {
         final cheminAffiche = doc['chemin'] ??
           [doc['armoire_nom'] ?? doc['armoire'], doc['casier_nom'] ?? doc['casier'], doc['dossier_nom'] ?? doc['dossier']]
             .where((e) => e != null && e.toString().isNotEmpty).join(' > ');
-        return Card(
-          margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 0),
+        return ResponsiveService.responsiveCard(
+          context: context,
+          padding: EdgeInsets.all(ResponsiveService.getCardPadding(context)),
           child: ListTile(
-            leading: const Icon(Icons.description),
-            title: Text(nomAffiche),
-            subtitle: Text(cheminAffiche),
+            leading: Icon(Icons.description, size: ResponsiveService.getIconSize(context)),
+            title: Text(
+              nomAffiche,
+              style: TextStyle(fontSize: ResponsiveService.getFontSize(context, baseSize: 14)),
+            ),
+            subtitle: Text(
+              cheminAffiche,
+              style: TextStyle(fontSize: ResponsiveService.getFontSize(context, baseSize: 12)),
+            ),
             onTap: () {
               Navigator.of(context).push(
                 MaterialPageRoute(
@@ -357,10 +367,17 @@ class _HomeScreenState extends State<HomeScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text('Résultats pour "${_quickSearchController.text}"'),
+        title: Text(
+          'Résultats pour "${_quickSearchController.text}"',
+          style: TextStyle(fontSize: ResponsiveService.getFontSize(context, baseSize: 16)),
+        ),
         content: SizedBox(
-          width: 400,
-          height: 400,
+          width: ResponsiveService.isMobile(context) 
+            ? MediaQuery.of(context).size.width * 0.9 
+            : 400,
+          height: ResponsiveService.isMobile(context) 
+            ? MediaQuery.of(context).size.height * 0.6 
+            : 400,
           child: _quickResults.isEmpty
               ? const Text('Aucun document trouvé')
               : ListView.builder(
@@ -373,9 +390,15 @@ class _HomeScreenState extends State<HomeScreen> {
                     final dossier = doc['dossier'] ?? '';
                     final cheminAffiche = [armoire, casier, dossier].where((e) => e != null && e.toString().isNotEmpty).join(' > ');
                     return ListTile(
-                      leading: const Icon(Icons.description),
-                      title: Text(nomAffiche),
-                      subtitle: Text(cheminAffiche),
+                      leading: Icon(Icons.description, size: ResponsiveService.getIconSize(context)),
+                      title: Text(
+                        nomAffiche,
+                        style: TextStyle(fontSize: ResponsiveService.getFontSize(context, baseSize: 14)),
+                      ),
+                      subtitle: Text(
+                        cheminAffiche,
+                        style: TextStyle(fontSize: ResponsiveService.getFontSize(context, baseSize: 12)),
+                      ),
                       onTap: () {
                         Navigator.pop(context); // Fermer le dialog
                         Navigator.of(context).push(
@@ -389,9 +412,13 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
         ),
         actions: [
-          TextButton(
+          ResponsiveService.responsiveButton(
+            context: context,
             onPressed: () => Navigator.pop(context),
-            child: const Text('Fermer'),
+            child: Text(
+              'Fermer',
+              style: TextStyle(fontSize: ResponsiveService.getFontSize(context, baseSize: 14)),
+            ),
           ),
         ],
       ),
@@ -827,26 +854,25 @@ class _HomeScreenState extends State<HomeScreen> {
                   
                   // Cards de statistiques
                   SizedBox(height: 16),
-                  Row(
+                  ResponsiveService.responsiveGrid(
+                    context: context,
                     children: [
-                      Expanded(
-                        child: _buildStatCard(
-                          'Armoires', 
-                          '${authStateService.armoireCount ?? 0}', 
-                          Icons.inventory_2, 
-                          Colors.blue[600]!
-                        ),
+                      _buildStatCard(
+                        'Armoires', 
+                        '${authStateService.armoireCount ?? 0}', 
+                        Icons.inventory_2, 
+                        Colors.blue[600]!
                       ),
-                      SizedBox(width: 12),
-                      Expanded(
-                        child: _buildStatCard(
-                          'Casiers', 
-                          '${authStateService.casierCount ?? 0}', 
-                          Icons.folder, 
-                          Colors.green[600]!
-                        ),
+                      _buildStatCard(
+                        'Casiers', 
+                        '${authStateService.casierCount ?? 0}', 
+                        Icons.folder, 
+                        Colors.green[600]!
                       ),
                     ],
+                    mobileCrossAxisCount: 2,
+                    tabletCrossAxisCount: 2,
+                    desktopCrossAxisCount: 2,
                   ),
                   
                   // Bouton admin si nécessaire
@@ -949,31 +975,37 @@ class _HomeScreenState extends State<HomeScreen> {
                       Row(
                         children: [
                           Expanded(
-                            child: ElevatedButton.icon(
+                            child: ResponsiveService.responsiveButton(
+                              context: context,
                               onPressed: _showMultiSelectFilters,
-                              icon: Icon(Icons.tune),
-                              label: Text('Filtres'),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.blue[50],
-                                foregroundColor: Colors.blue[700],
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(Icons.tune, size: ResponsiveService.getIconSize(context)),
+                                  SizedBox(width: 8),
+                                  Text(
+                                    'Filtres',
+                                    style: TextStyle(fontSize: ResponsiveService.getFontSize(context, baseSize: 14)),
+                                  ),
+                                ],
                               ),
                             ),
                           ),
                           SizedBox(width: 12),
                           Expanded(
-                            child: ElevatedButton.icon(
+                            child: ResponsiveService.responsiveButton(
+                              context: context,
                               onPressed: _performQuickSearch,
-                              icon: Icon(Icons.search),
-                              label: Text('Rechercher'),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.blue[600],
-                                foregroundColor: Colors.white,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(Icons.search, size: ResponsiveService.getIconSize(context)),
+                                  SizedBox(width: 8),
+                                  Text(
+                                    'Rechercher',
+                                    style: TextStyle(fontSize: ResponsiveService.getFontSize(context, baseSize: 14)),
+                                  ),
+                                ],
                               ),
                             ),
                           ),

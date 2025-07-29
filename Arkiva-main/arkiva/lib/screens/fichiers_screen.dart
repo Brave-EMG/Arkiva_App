@@ -76,27 +76,9 @@ class _FichiersScreenState extends State<FichiersScreen> {
     Color? color,
     EdgeInsets? padding,
   }) {
-    return Card(
-      elevation: 8,
-      shadowColor: Colors.black26,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [
-              color?.withOpacity(0.1) ?? Colors.blue.withOpacity(0.1),
-              color?.withOpacity(0.05) ?? Colors.blue.withOpacity(0.05),
-            ],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
-          borderRadius: BorderRadius.circular(16),
-        ),
-        padding: padding ?? const EdgeInsets.all(20),
-        child: child,
-      ),
+    return ResponsiveService.responsiveCard(
+      context: context,
+      child: child,
     );
   }
 

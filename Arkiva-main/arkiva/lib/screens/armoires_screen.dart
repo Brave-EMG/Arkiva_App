@@ -98,140 +98,91 @@ class _ArmoiresScreenState extends State<ArmoiresScreen> {
   }
 
   Widget _buildArmoireCard(Armoire armoire) {
-    return _buildModernCard(
-      color: _abonnementActif ? Colors.purple[50] : Colors.grey[50],
-      padding: EdgeInsets.all(ResponsiveService.getCardPadding(context)),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          // Icône avec container moderne
-          Container(
-            padding: EdgeInsets.all(ResponsiveService.getCardPadding(context)),
-            decoration: BoxDecoration(
-              color: _abonnementActif 
-                  ? Colors.purple.withOpacity(0.1)
-                  : Colors.grey.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(ResponsiveService.getBorderRadius(context)),
-              border: Border.all(
-                color: _abonnementActif 
-                    ? Colors.purple.withOpacity(0.2)
-                    : Colors.grey.withOpacity(0.2),
-                width: 1,
+    return ResponsiveService.responsiveCard(
+      context: context,
+      child: InkWell(
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => CasiersScreen(
+                armoireId: armoire.armoireId,
+                armoireNom: armoire.nom,
+                entrepriseId: widget.entrepriseId,
               ),
             ),
-            child: Icon(
-              _abonnementActif ? Icons.warehouse_rounded : Icons.lock_rounded,
-              size: ResponsiveService.getIconSize(context) * 1.2,
-              color: _abonnementActif 
-                  ? Colors.purple[600]
-                  : Colors.grey[600],
-            ),
+          );
+        },
+        borderRadius: BorderRadius.circular(ResponsiveService.getBorderRadius(context)),
+        child: Padding(
+          padding: EdgeInsets.all(ResponsiveService.getCardPadding(context)),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    padding: EdgeInsets.all(ResponsiveService.getPadding(context) * 0.5),
+                    decoration: BoxDecoration(
+                      color: Colors.blue[100],
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Icon(
+                      Icons.inventory_2,
+                      color: Colors.blue[700],
+                      size: ResponsiveService.getIconSize(context),
+                    ),
+                  ),
+                  SizedBox(width: ResponsiveService.getPadding(context)),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          armoire.nom,
+                          style: TextStyle(
+                            fontSize: ResponsiveService.getFontSize(context, baseSize: 16),
+                            fontWeight: FontWeight.bold,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        if (armoire.description != null && armoire.description!.isNotEmpty)
+                          Text(
+                            armoire.description!,
+                            style: TextStyle(
+                              fontSize: ResponsiveService.getFontSize(context, baseSize: 12),
+                              color: Colors.grey[600],
+                            ),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              SizedBox(height: ResponsiveService.getPadding(context)),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Créée le ${_formatDate(armoire.dateCreation)}',
+                    style: TextStyle(
+                      fontSize: ResponsiveService.getFontSize(context, baseSize: 10),
+                      color: Colors.grey[500],
+                    ),
+                  ),
+                  Icon(
+                    Icons.arrow_forward_ios,
+                    size: ResponsiveService.getIconSize(context) * 0.8,
+                    color: Colors.grey[400],
+                  ),
+                ],
+              ),
+            ],
           ),
-          SizedBox(height: ResponsiveService.getCardPadding(context)),
-          
-          // Nom de l'armoire
-          Text(
-            armoire.nom,
-            style: TextStyle(
-              fontWeight: FontWeight.w600,
-              fontSize: ResponsiveService.getFontSize(context, baseSize: 15),
-              color: _abonnementActif 
-                  ? Colors.purple[700]
-                  : Colors.grey[700],
-              letterSpacing: 0.2,
-            ),
-            textAlign: TextAlign.center,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-          ),
-          
-          // Sous-titre si disponible
-          if (armoire.sousTitre.isNotEmpty) ...[
-            SizedBox(height: ResponsiveService.getCardPadding(context) * 0.4),
-            Text(
-              armoire.sousTitre,
-              style: TextStyle(
-                fontSize: ResponsiveService.getFontSize(context, baseSize: 12),
-                color: Colors.grey[500],
-                letterSpacing: 0.1,
-              ),
-              textAlign: TextAlign.center,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ],
-          
-          // Badge d'abonnement si nécessaire
-          if (!_abonnementActif) ...[
-            SizedBox(height: ResponsiveService.getCardPadding(context) * 0.6),
-            Container(
-              padding: EdgeInsets.symmetric(
-                horizontal: ResponsiveService.getCardPadding(context) * 0.5,
-                vertical: ResponsiveService.getCardPadding(context) * 0.2,
-              ),
-              decoration: BoxDecoration(
-                color: Colors.red.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(ResponsiveService.getBorderRadius(context)),
-                border: Border.all(
-                  color: Colors.red.withOpacity(0.3),
-                  width: 1,
-                ),
-              ),
-              child: Text(
-                'Abonnement requis',
-                style: TextStyle(
-                  color: Colors.red[700],
-                  fontSize: ResponsiveService.getFontSize(context, baseSize: 10),
-                  fontWeight: FontWeight.w500,
-                  letterSpacing: 0.1,
-                ),
-              ),
-            ),
-          ],
-          
-          SizedBox(height: ResponsiveService.getCardPadding(context)),
-          
-          // Bouton d'action moderne
-          if (_abonnementActif)
-            Container(
-              width: double.infinity,
-              child: ResponsiveService.responsiveButton(
-                context: context,
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => CasiersScreen(
-                        armoireId: armoire.armoireId,
-                        armoireNom: armoire.nom,
-                        entrepriseId: widget.entrepriseId,
-                      ),
-                    ),
-                  );
-                },
-                backgroundColor: Colors.purple[600],
-                foregroundColor: Colors.white,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(
-                      Icons.folder_open_rounded, 
-                      size: ResponsiveService.getIconSize(context) * 0.6,
-                    ),
-                    SizedBox(width: ResponsiveService.getCardPadding(context) * 0.4),
-                    Text(
-                      'Ouvrir',
-                      style: TextStyle(
-                        fontSize: ResponsiveService.getFontSize(context, baseSize: 13),
-                        fontWeight: FontWeight.w500,
-                        letterSpacing: 0.2,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-        ],
+        ),
       ),
     );
   }
@@ -511,107 +462,279 @@ class _ArmoiresScreenState extends State<ArmoiresScreen> {
     );
   }
 
+  String _formatDate(DateTime date) {
+    return '${date.day}/${date.month}/${date.year}';
+  }
+
+  void _showCreateArmoireDialog() {
+    final TextEditingController controller = TextEditingController();
+    final TextEditingController descriptionController = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Row(
+          children: [
+            Icon(Icons.add_box, color: Colors.blue[600]),
+            SizedBox(width: 8),
+            Text('Créer une nouvelle armoire'),
+          ],
+        ),
+        content: SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: controller,
+                decoration: InputDecoration(
+                  labelText: 'Nom de l\'armoire',
+                  hintText: 'Entrez le nom de l\'armoire',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  prefixIcon: Icon(Icons.warehouse, color: Colors.blue[600]),
+                ),
+              ),
+              SizedBox(height: 16),
+              TextField(
+                controller: descriptionController,
+                decoration: InputDecoration(
+                  labelText: 'Description (optionnel)',
+                  hintText: 'Ajoutez une description pour l\'armoire',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  prefixIcon: Icon(Icons.description, color: Colors.blue[600]),
+                ),
+              ),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text('Annuler'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              final String nom = controller.text.trim();
+              final String? description = descriptionController.text.trim();
+
+              if (nom.isNotEmpty) {
+                _createArmoire();
+                Navigator.pop(context);
+              } else {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Le nom de l\'armoire est requis.')),
+                );
+              }
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.blue[600],
+              foregroundColor: Colors.white,
+            ),
+            child: Text('Créer'),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        title: Text(
+          'Armoires',
+          style: TextStyle(fontSize: ResponsiveService.getFontSize(context, baseSize: 20)),
+        ),
+        backgroundColor: Colors.blue[700],
+        foregroundColor: Colors.white,
         elevation: 0,
-        flexibleSpace: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [Colors.purple[900]!, Colors.purple[700]!],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-          ),
-        ),
-        title: Row(
-          children: [
-            Icon(Icons.warehouse, color: Colors.white, size: 24),
-            SizedBox(width: 8),
-            Text(
-              'Armoires',
-              style: TextStyle(
-                color: Colors.white,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ],
-        ),
         actions: [
           IconButton(
-            icon: Icon(Icons.refresh, color: Colors.white),
-            onPressed: () {
-              _checkAbonnement();
-              _loadArmoires();
-            },
-            tooltip: 'Actualiser',
+            onPressed: _showCreateArmoireDialog,
+            icon: Icon(
+              Icons.add,
+              size: ResponsiveService.getIconSize(context),
+            ),
           ),
         ],
       ),
-      body: _isLoading || !_abonnementCharge
-          ? Center(
-              child: _buildModernCard(
-                child: Column(
-                  children: [
-                    CircularProgressIndicator(),
-                    SizedBox(height: 16),
-                    Text('Chargement des armoires...'),
-                  ],
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              Colors.blue[700]!,
+              Colors.blue[50]!,
+            ],
+          ),
+        ),
+        child: SafeArea(
+          child: Column(
+            children: [
+              // En-tête avec statistiques
+              Container(
+                padding: EdgeInsets.all(ResponsiveService.getScreenPadding(context).horizontal),
+                child: ResponsiveService.responsiveCard(
+                  context: context,
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.inventory_2,
+                        size: ResponsiveService.getIconSize(context) * 1.5,
+                        color: Colors.blue[700],
+                      ),
+                      SizedBox(width: ResponsiveService.getPadding(context)),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              '${_armoires.length} Armoire${_armoires.length > 1 ? 's' : ''}',
+                              style: TextStyle(
+                                fontSize: ResponsiveService.getFontSize(context, baseSize: 18),
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            Text(
+                              'Organisez vos documents',
+                              style: TextStyle(
+                                fontSize: ResponsiveService.getFontSize(context, baseSize: 12),
+                                color: Colors.grey[600],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
-            )
-          : _error != null
-              ? _buildErrorWidget()
-              : Column(
-                  children: [
-                    if (!_abonnementActif)
-                      Padding(
-                        padding: EdgeInsets.all(20),
-                        child: _buildSubscriptionWarning(),
-                      ),
-                    Expanded(
-                      child: _armoires.isEmpty
-                          ? _buildEmptyState()
-                  : GridView.builder(
-                              padding: EdgeInsets.all(20),
-                              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                                crossAxisCount: MediaQuery.of(context).size.width > 1200 ? 4 : 
-                                               MediaQuery.of(context).size.width > 800 ? 3 : 2,
-                                childAspectRatio: 1.0,
-                        crossAxisSpacing: 16,
-                        mainAxisSpacing: 16,
-                      ),
-                      itemCount: _armoires.length,
-                      itemBuilder: (context, index) {
-                        final armoire = _armoires[index];
-                                return Stack(
-                            children: [
-                                    _buildArmoireCard(armoire),
-                                    if (_abonnementActif)
-                              Positioned(
-                                        top: 8,
-                                        right: 8,
-                                child: IconButton(
-                                          icon: Icon(Icons.delete, color: Colors.red[600]),
-                                  tooltip: 'Supprimer l\'armoire',
-                                  onPressed: () => _deleteArmoire(armoire),
-                                ),
+              
+              SizedBox(height: ResponsiveService.getPadding(context)),
+              
+              // Liste des armoires
+              Expanded(
+                child: _isLoading
+                    ? Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            CircularProgressIndicator(
+                              color: Colors.blue[700],
+                            ),
+                            SizedBox(height: ResponsiveService.getPadding(context)),
+                            Text(
+                              'Chargement des armoires...',
+                              style: TextStyle(
+                                fontSize: ResponsiveService.getFontSize(context, baseSize: 14),
+                                color: Colors.grey[600],
                               ),
-                            ],
-                                );
-                              },
+                            ),
+                          ],
+                        ),
+                      )
+                    : _error != null
+                        ? Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  Icons.error_outline,
+                                  size: ResponsiveService.getIconSize(context) * 2,
+                                  color: Colors.red[300],
+                                ),
+                                SizedBox(height: ResponsiveService.getPadding(context)),
+                                Text(
+                                  'Erreur: $_error',
+                                  style: TextStyle(
+                                    fontSize: ResponsiveService.getFontSize(context, baseSize: 14),
+                                    color: Colors.red[700],
+                                  ),
+                                  textAlign: TextAlign.center,
+                                ),
+                                SizedBox(height: ResponsiveService.getPadding(context)),
+                                ResponsiveService.responsiveButton(
+                                  context: context,
+                                  onPressed: _loadArmoires,
+                                  child: Text(
+                                    'Réessayer',
+                                    style: TextStyle(fontSize: ResponsiveService.getFontSize(context, baseSize: 14)),
                                   ),
                                 ),
                               ],
-                    ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: _abonnementActif ? _createArmoire : null,
-        icon: Icon(Icons.add, color: Colors.white),
-        label: Text('Créer', style: TextStyle(color: Colors.white)),
-        backgroundColor: Colors.purple[600],
-        tooltip: 'Créer une armoire',
+                            ),
+                          )
+                        : _armoires.isEmpty
+                            ? Center(
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Icon(
+                                      Icons.inventory_2_outlined,
+                                      size: ResponsiveService.getIconSize(context) * 3,
+                                      color: Colors.grey[400],
+                                    ),
+                                    SizedBox(height: ResponsiveService.getPadding(context)),
+                                    Text(
+                                      'Aucune armoire trouvée',
+                                      style: TextStyle(
+                                        fontSize: ResponsiveService.getFontSize(context, baseSize: 16),
+                                        color: Colors.grey[600],
+                                      ),
+                                    ),
+                                    SizedBox(height: ResponsiveService.getPadding(context) * 0.5),
+                                    Text(
+                                      'Créez votre première armoire pour commencer',
+                                      style: TextStyle(
+                                        fontSize: ResponsiveService.getFontSize(context, baseSize: 12),
+                                        color: Colors.grey[500],
+                                      ),
+                                      textAlign: TextAlign.center,
+                                    ),
+                                    SizedBox(height: ResponsiveService.getPadding(context)),
+                                    ResponsiveService.responsiveButton(
+                                      context: context,
+                                      onPressed: _showCreateArmoireDialog,
+                                      child: Text(
+                                        'Créer une armoire',
+                                        style: TextStyle(fontSize: ResponsiveService.getFontSize(context, baseSize: 14)),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              )
+                            : Padding(
+                                padding: ResponsiveService.getHorizontalPadding(context),
+                                child: ResponsiveService.responsiveGrid(
+                                  context: context,
+                                  children: _armoires.map((armoire) => _buildArmoireCard(armoire)).toList(),
+                                  mobileCrossAxisCount: 1,
+                                  tabletCrossAxisCount: 2,
+                                  desktopCrossAxisCount: 3,
+                                  crossAxisSpacing: ResponsiveService.getPadding(context),
+                                  mainAxisSpacing: ResponsiveService.getPadding(context),
+                                ),
+                              ),
+              ),
+            ],
+          ),
+        ),
       ),
+      floatingActionButton: _armoires.isNotEmpty
+          ? FloatingActionButton(
+              onPressed: _showCreateArmoireDialog,
+              backgroundColor: Colors.blue[700],
+              foregroundColor: Colors.white,
+              child: Icon(
+                Icons.add,
+                size: ResponsiveService.getIconSize(context),
+              ),
+            )
+          : null,
     );
   }
 } 

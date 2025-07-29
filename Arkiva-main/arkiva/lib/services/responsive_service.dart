@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 
 class ResponsiveService {
-  static const double _mobileBreakpoint = 600;
-  static const double _tabletBreakpoint = 900;
+  // Breakpoints ajustés pour une meilleure expérience mobile
+  static const double _mobileBreakpoint = 768; // Augmenté pour inclure les tablettes en mode portrait
+  static const double _tabletBreakpoint = 1024; // Standard pour les tablettes
   static const double _desktopBreakpoint = 1200;
 
   static bool isMobile(BuildContext context) {
@@ -79,6 +80,43 @@ class ResponsiveService {
     if (isMobile(context)) return double.infinity;
     if (isTablet(context)) return 600;
     return 800;
+  }
+
+  // Méthodes pour les dialogues responsifs
+  static double getDialogWidth(BuildContext context) {
+    if (isMobile(context)) return MediaQuery.of(context).size.width * 0.95;
+    if (isTablet(context)) return MediaQuery.of(context).size.width * 0.7;
+    return 500;
+  }
+
+  static double getDialogHeight(BuildContext context) {
+    if (isMobile(context)) return MediaQuery.of(context).size.height * 0.8;
+    if (isTablet(context)) return MediaQuery.of(context).size.height * 0.7;
+    return 600;
+  }
+
+  static Widget responsiveDialog({
+    required BuildContext context,
+    required Widget child,
+    String? title,
+    List<Widget>? actions,
+    bool barrierDismissible = true,
+  }) {
+    return AlertDialog(
+      title: title != null ? Text(
+        title,
+        style: TextStyle(fontSize: getFontSize(context, baseSize: 18)),
+      ) : null,
+      content: SizedBox(
+        width: getDialogWidth(context),
+        height: getDialogHeight(context),
+        child: child,
+      ),
+      actions: actions,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(getBorderRadius(context)),
+      ),
+    );
   }
 
   static Widget responsiveBuilder({
@@ -277,5 +315,26 @@ class ResponsiveService {
         ),
       ),
     );
+  }
+
+  // Méthode pour adapter la taille des images selon l'écran
+  static double getImageSize(BuildContext context, {double baseSize = 100.0}) {
+    if (isMobile(context)) return baseSize * 0.8;
+    if (isTablet(context)) return baseSize * 1.0;
+    return baseSize * 1.2;
+  }
+
+  // Méthode pour adapter l'espacement des éléments
+  static double getSpacing(BuildContext context, {double baseSpacing = 16.0}) {
+    if (isMobile(context)) return baseSpacing * 0.8;
+    if (isTablet(context)) return baseSpacing * 1.0;
+    return baseSpacing * 1.2;
+  }
+
+  // Méthode pour adapter la hauteur des conteneurs
+  static double getContainerHeight(BuildContext context, {double baseHeight = 100.0}) {
+    if (isMobile(context)) return baseHeight * 0.9;
+    if (isTablet(context)) return baseHeight * 1.0;
+    return baseHeight * 1.1;
   }
 } 
