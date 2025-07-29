@@ -6,16 +6,36 @@ class ApiConfig {
   static const int connectionTimeout = 30; // 30 secondes
   static const int pingTimeout = 5; // 5 secondes
   
-  // Pour le développement, utilisez 10.0.2.2 pour l'émulateur Android
-  // et localhost pour iOS/web
+  // Configuration pour différents environnements
   static String get baseUrl {
     if (kIsWeb) {
       return 'http://localhost:3000';
     } else if (Platform.isAndroid) {
-      // 10.0.2.2 est l'équivalent de localhost pour l'émulateur Android
-      return 'http://10.0.2.2:3000';
+      // Détection automatique : émulateur vs vrai appareil
+      return _getAndroidBaseUrl();
     } else {
       return 'http://localhost:3000';
+    }
+  }
+
+  static String _getAndroidBaseUrl() {
+    // Pour l'émulateur Android
+    if (_isEmulator()) {
+      return 'http://10.0.2.2:3000';
+    }
+    
+    // Pour un vrai appareil Android - utilisez l'IP de votre ordinateur
+    // Remplacez par l'IP de votre ordinateur sur le réseau local
+    return 'http://192.168.100.112:3000'; // IP de votre ordinateur
+  }
+
+  static bool _isEmulator() {
+    // Détection basique d'émulateur
+    try {
+      final androidId = Platform.environment['ANDROID_ID'] ?? '';
+      return androidId.contains('google') || androidId.contains('sdk');
+    } catch (e) {
+      return false;
     }
   }
 
