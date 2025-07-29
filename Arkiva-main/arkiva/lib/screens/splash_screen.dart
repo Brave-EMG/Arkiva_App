@@ -53,22 +53,28 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
   }
 
   Future<void> _initializeApp() async {
-    await _controller.forward();
-    await Future.delayed(const Duration(seconds: 1));
-    
-    if (!mounted) return;
-    
-    final authStateService = context.read<AuthStateService>();
-    await authStateService.initialize();
+    try {
+      await _controller.forward();
+      await Future.delayed(const Duration(seconds: 1));
+      
+      if (!mounted) return;
+      
+      final authStateService = context.read<AuthStateService>();
+      await authStateService.initialize();
 
-    if (!mounted) return;
+      if (!mounted) return;
 
-    if (authStateService.isAuthenticated) {
-      Navigator.of(context).pushReplacementNamed('/home');
-    } else {
-      Navigator.of(context).pushReplacement(
-        AnimationService.fadeTransition(const WelcomeScreen()),
-      );
+      if (authStateService.isAuthenticated) {
+        Navigator.of(context).pushReplacementNamed('/home');
+      } else {
+        Navigator.of(context).pushReplacementNamed('/welcome');
+      }
+    } catch (e) {
+      debugPrint('Erreur lors de l\'initialisation: $e');
+      // En cas d'erreur, rediriger vers l'écran de bienvenue
+      if (mounted) {
+        Navigator.of(context).pushReplacementNamed('/welcome');
+      }
     }
   }
 

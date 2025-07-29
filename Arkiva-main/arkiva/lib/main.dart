@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:arkiva/screens/home_screen.dart';
 import 'package:arkiva/screens/splash_screen.dart';
+import 'package:arkiva/screens/welcome_screen.dart';
 import 'package:arkiva/screens/register_screen.dart';
 import 'package:arkiva/screens/create_entreprise_screen.dart';
 import 'package:arkiva/services/theme_service.dart';
@@ -45,6 +46,7 @@ class ArkivaApp extends StatelessWidget {
       initialRoute: '/',
       routes: {
         '/': (context) => const SplashScreen(),
+        '/welcome': (context) => const WelcomeScreen(),
         '/home': (context) => const HomeScreen(),
         '/register': (context) => const RegisterScreen(),
         '/create-entreprise': (context) => const CreateEntrepriseScreen(),
