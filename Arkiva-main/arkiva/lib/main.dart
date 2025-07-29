@@ -1,22 +1,28 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:arkiva/screens/home_screen.dart';
-import 'package:arkiva/screens/splash_screen.dart';
-import 'package:arkiva/screens/welcome_screen.dart';
+import 'package:arkiva/screens/login_screen.dart';
 import 'package:arkiva/screens/register_screen.dart';
-import 'package:arkiva/screens/create_entreprise_screen.dart';
-import 'package:arkiva/services/theme_service.dart';
-import 'package:arkiva/services/auth_state_service.dart';
+import 'package:arkiva/screens/splash_screen.dart';
+import 'package:arkiva/screens/armoires_screen.dart';
+import 'package:arkiva/screens/casiers_screen.dart';
+import 'package:arkiva/screens/dossiers_screen.dart';
+import 'package:arkiva/screens/fichiers_screen.dart';
 import 'package:arkiva/screens/scan_screen.dart';
-import 'package:arkiva/screens/upload_screen.dart';
-import 'package:arkiva/services/animation_service.dart';
-import 'package:arkiva/screens/admin_dashboard_screen.dart';
+import 'package:arkiva/screens/profile_screen.dart';
+import 'package:arkiva/screens/settings_screen.dart';
 import 'package:arkiva/screens/backups_screen.dart';
-import 'package:arkiva/screens/versions_screen.dart';
-import 'package:arkiva/screens/restorations_screen.dart';
-import 'screens/payment_screen.dart';
-import 'screens/responsive_test_screen.dart';
+import 'package:arkiva/screens/admin_dashboard_screen.dart';
+import 'package:arkiva/screens/responsive_test_screen.dart';
+import 'package:arkiva/screens/welcome_screen.dart';
+import 'package:arkiva/services/auth_state_service.dart';
+import 'package:arkiva/services/armoire_service.dart';
+import 'package:arkiva/services/casier_service.dart';
+import 'package:arkiva/services/dossier_service.dart';
+import 'package:arkiva/services/fichier_service.dart';
+import 'package:arkiva/services/backup_service.dart';
+import 'package:arkiva/services/admin_service.dart';
+import 'package:arkiva/services/responsive_service.dart';
 
 void main() {
   runApp(
@@ -47,10 +53,8 @@ class ArkivaApp extends StatelessWidget {
       routes: {
         '/': (context) => const SplashScreen(),
         '/welcome': (context) => const WelcomeScreen(),
-        '/test': (context) => const TestScreen(),
         '/home': (context) => const HomeScreen(),
         '/register': (context) => const RegisterScreen(),
-        '/create-entreprise': (context) => const CreateEntrepriseScreen(),
         '/scan': (context) => const ScanScreen(),
         '/upload': (context) => const UploadScreen(),
         '/admin-dashboard': (context) => const AdminDashboardScreen(),
@@ -72,107 +76,6 @@ class ArkivaApp extends StatelessWidget {
           child: child!,
         );
       },
-    );
-  }
-}
-
-// Écran de test simple pour diagnostiquer
-class TestScreen extends StatelessWidget {
-  const TestScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Test Screen'),
-        backgroundColor: Colors.red,
-      ),
-      body: const Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.check_circle,
-              size: 100,
-              color: Colors.green,
-            ),
-            SizedBox(height: 24),
-            Text(
-              'Test Screen - Navigation OK',
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            SizedBox(height: 16),
-            Text(
-              'Si vous voyez cette page, la navigation fonctionne',
-              style: TextStyle(fontSize: 16),
-              textAlign: TextAlign.center,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-// Écran de test pour le paiement
-class PaymentTestScreen extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Test Paiement FeexPay'),
-        backgroundColor: Color(0xFF112C56),
-      ),
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.payment,
-              size: 100,
-              color: Color(0xFF112C56),
-            ),
-            SizedBox(height: 24),
-            Text(
-              'Test Intégration FeexPay',
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            SizedBox(height: 16),
-            Text(
-              'Cliquez sur le bouton ci-dessous pour tester le paiement',
-              style: TextStyle(fontSize: 16),
-              textAlign: TextAlign.center,
-            ),
-            SizedBox(height: 32),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.pushNamed(context, '/payment');
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Color(0xFF112C56),
-                padding: EdgeInsets.symmetric(horizontal: 32, vertical: 16),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10.0),
-                ),
-              ),
-              child: Text(
-                'Tester le Paiement',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
     );
   }
 }

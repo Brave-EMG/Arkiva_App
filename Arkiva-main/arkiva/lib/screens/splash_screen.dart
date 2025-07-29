@@ -63,17 +63,6 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
         return;
       }
       
-      // Pour le moment, rediriger directement vers l'écran de test
-      // pour diagnostiquer le problème de navigation
-      debugPrint('🧪 Navigation vers l\'écran de test...');
-      Navigator.of(context).pushReplacementNamed('/test');
-      
-      // TODO: Réactiver la navigation vers welcome une fois le problème résolu
-      // debugPrint('👋 Navigation directe vers l\'écran de bienvenue...');
-      // Navigator.of(context).pushReplacementNamed('/welcome');
-      
-      // TODO: Réactiver l'initialisation complète une fois le problème résolu
-      /*
       debugPrint('🔐 Initialisation du service d\'authentification...');
       final authStateService = context.read<AuthStateService>();
       
@@ -101,7 +90,6 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
         debugPrint('👋 Navigation vers l\'écran de bienvenue...');
         Navigator.of(context).pushReplacementNamed('/welcome');
       }
-      */
     } catch (e) {
       debugPrint('❌ Erreur générale lors de l\'initialisation: $e');
       // En cas d'erreur, rediriger vers l'écran de bienvenue
