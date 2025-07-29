@@ -22,36 +22,50 @@ class AuthStateService extends ChangeNotifier {
   int? get casierCount => _casierCount;
 
   Future<void> initialize() async {
-    print('🔄 Initialisation de l\'état d\'authentification...');
-    final prefs = await SharedPreferences.getInstance();
-    _token = prefs.getString('token');
-    _isAuthenticated = _token != null;
+    try {
+      print('🔄 Initialisation de l\'état d\'authentification...');
+      final prefs = await SharedPreferences.getInstance();
+      _token = prefs.getString('token');
+      _isAuthenticated = _token != null;
 
-    if (_isAuthenticated) {
-      try {
-        final userInfo = await AuthService().getUserInfo(_token!);
-        _userId = userInfo['user_id']?.toString() ?? userInfo['id']?.toString();
-        _username = userInfo['username'];
-        _entrepriseId = userInfo['entreprise_id'];
-        _role = userInfo['role'];
-        print('   - User ID (from /me): $_userId');
-        print('   - Username: $_username');
-        print('   - Entreprise ID: $_entrepriseId');
-        print('   - Role: $_role');
-      } catch (e) {
-        print('❌ Erreur lors de la récupération des infos utilisateur au démarrage: $e');
-        await clearAuthState();
+      if (_isAuthenticated) {
+        try {
+          final userInfo = await AuthService().getUserInfo(_token!);
+          _userId = userInfo['user_id']?.toString() ?? userInfo['id']?.toString();
+          _username = userInfo['username'];
+          _entrepriseId = userInfo['entreprise_id'];
+          _role = userInfo['role'];
+          print('   - User ID (from /me): $_userId');
+          print('   - Username: $_username');
+          print('   - Entreprise ID: $_entrepriseId');
+          print('   - Role: $_role');
+        } catch (e) {
+          print('❌ Erreur lors de la récupération des infos utilisateur au démarrage: $e');
+          // Ne pas effacer l'état d'authentification, juste marquer comme non authentifié
+          _isAuthenticated = false;
+          _token = null;
+        }
       }
+      
+      print('📊 État d\'authentification:');
+      print('   - Authentifié: $_isAuthenticated');
+      print('   - User ID: $_userId');
+      print('   - Username: $_username');
+      print('   - Entreprise ID: $_entrepriseId');
+      print('   - Role: $_role');
+      
+      notifyListeners();
+    } catch (e) {
+      print('❌ Erreur critique lors de l\'initialisation: $e');
+      // En cas d'erreur critique, s'assurer que l'état est cohérent
+      _isAuthenticated = false;
+      _token = null;
+      _userId = null;
+      _username = null;
+      _entrepriseId = null;
+      _role = null;
+      notifyListeners();
     }
-    
-    print('📊 État d\'authentification:');
-    print('   - Authentifié: $_isAuthenticated');
-    print('   - User ID: $_userId');
-    print('   - Username: $_username');
-    print('   - Entreprise ID: $_entrepriseId');
-    print('   - Role: $_role');
-    
-    notifyListeners();
   }
 
   Future<void> setAuthState(String token, String userIdParam) async {

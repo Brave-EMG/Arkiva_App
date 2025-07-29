@@ -47,6 +47,7 @@ class ArkivaApp extends StatelessWidget {
       routes: {
         '/': (context) => const SplashScreen(),
         '/welcome': (context) => const WelcomeScreen(),
+        '/test': (context) => const TestScreen(),
         '/home': (context) => const HomeScreen(),
         '/register': (context) => const RegisterScreen(),
         '/create-entreprise': (context) => const CreateEntrepriseScreen(),
@@ -71,6 +72,47 @@ class ArkivaApp extends StatelessWidget {
           child: child!,
         );
       },
+    );
+  }
+}
+
+// Écran de test simple pour diagnostiquer
+class TestScreen extends StatelessWidget {
+  const TestScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Test Screen'),
+        backgroundColor: Colors.red,
+      ),
+      body: const Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.check_circle,
+              size: 100,
+              color: Colors.green,
+            ),
+            SizedBox(height: 24),
+            Text(
+              'Test Screen - Navigation OK',
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            SizedBox(height: 16),
+            Text(
+              'Si vous voyez cette page, la navigation fonctionne',
+              style: TextStyle(fontSize: 16),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

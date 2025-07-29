@@ -54,25 +54,59 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
 
   Future<void> _initializeApp() async {
     try {
+      debugPrint('🚀 Démarrage de l\'initialisation...');
       await _controller.forward();
       await Future.delayed(const Duration(seconds: 1));
       
-      if (!mounted) return;
+      if (!mounted) {
+        debugPrint('❌ Widget non monté après animation');
+        return;
+      }
       
+      // Pour le moment, rediriger directement vers l'écran de test
+      // pour diagnostiquer le problème de navigation
+      debugPrint('🧪 Navigation vers l\'écran de test...');
+      Navigator.of(context).pushReplacementNamed('/test');
+      
+      // TODO: Réactiver la navigation vers welcome une fois le problème résolu
+      // debugPrint('👋 Navigation directe vers l\'écran de bienvenue...');
+      // Navigator.of(context).pushReplacementNamed('/welcome');
+      
+      // TODO: Réactiver l'initialisation complète une fois le problème résolu
+      /*
+      debugPrint('🔐 Initialisation du service d\'authentification...');
       final authStateService = context.read<AuthStateService>();
-      await authStateService.initialize();
+      
+      try {
+        await authStateService.initialize();
+        debugPrint('✅ Service d\'authentification initialisé');
+      } catch (e) {
+        debugPrint('❌ Erreur lors de l\'initialisation du service d\'auth: $e');
+        // Continuer même en cas d'erreur
+      }
 
-      if (!mounted) return;
+      if (!mounted) {
+        debugPrint('❌ Widget non monté après initialisation');
+        return;
+      }
 
-      if (authStateService.isAuthenticated) {
+      debugPrint('🔍 Vérification de l\'état d\'authentification...');
+      final isAuthenticated = authStateService.isAuthenticated;
+      debugPrint('📊 Utilisateur authentifié: $isAuthenticated');
+
+      if (isAuthenticated) {
+        debugPrint('🏠 Navigation vers l\'écran d\'accueil...');
         Navigator.of(context).pushReplacementNamed('/home');
       } else {
+        debugPrint('👋 Navigation vers l\'écran de bienvenue...');
         Navigator.of(context).pushReplacementNamed('/welcome');
       }
+      */
     } catch (e) {
-      debugPrint('Erreur lors de l\'initialisation: $e');
+      debugPrint('❌ Erreur générale lors de l\'initialisation: $e');
       // En cas d'erreur, rediriger vers l'écran de bienvenue
       if (mounted) {
+        debugPrint('🔄 Redirection de secours vers l\'écran de bienvenue...');
         Navigator.of(context).pushReplacementNamed('/welcome');
       }
     }
