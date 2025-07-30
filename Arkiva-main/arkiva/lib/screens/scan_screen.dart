@@ -4,6 +4,7 @@ import 'package:camera/camera.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:arkiva/services/image_processing_service.dart';
 import 'package:arkiva/services/animation_service.dart';
+import 'package:arkiva/services/responsive_service.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 
 class ScanScreen extends StatefulWidget {
@@ -118,162 +119,441 @@ class _ScanScreenState extends State<ScanScreen> {
     }
   }
 
-  @override
-  void dispose() {
-    _controller?.dispose();
-    _imageProcessingService.dispose();
-    super.dispose();
+  Widget _buildMobileLayout() {
+    return ResponsiveService.responsiveCard(
+      context: context,
+      child: Column(
+        children: [
+          // Interface caméra adaptée mobile
+          Expanded(
+            child: _buildCameraPreview(),
+          ),
+          // Contrôles adaptés
+          _buildMobileControls(),
+        ],
+      ),
+    );
   }
 
-  @override
-  Widget build(BuildContext context) {
-    if (!_isInitialized) {
-      return const Scaffold(
-        body: Center(
+  Widget _buildTabletLayout() {
+    return Row(
+      children: [
+        // Prévisualisation caméra
+        Expanded(
+          flex: 2,
+          child: _buildCameraPreview(),
+        ),
+        // Panneau de contrôle
+        Expanded(
+          flex: 1,
+          child: _buildTabletControls(),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildDesktopLayout() {
+    return Row(
+      children: [
+        // Prévisualisation caméra
+        Expanded(
+          flex: 3,
+          child: _buildCameraPreview(),
+        ),
+        // Panneau de contrôle
+        Expanded(
+          flex: 1,
+          child: _buildDesktopControls(),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildCameraPreview() {
+    if (!_isInitialized || _controller == null) {
+      return Container(
+        color: Colors.black,
+        child: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              CircularProgressIndicator(),
-              SizedBox(height: 16),
-              Text('Initialisation de la caméra...'),
+              CircularProgressIndicator(
+                color: Colors.white,
+              ),
+              SizedBox(height: ResponsiveService.getSpacing(context, baseSpacing: 16)),
+              Text(
+                'Initialisation de la caméra...',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: ResponsiveService.getFontSize(context, baseSize: 16),
+                ),
+              ),
             ],
           ),
         ),
       );
     }
 
-    return Scaffold(
-      backgroundColor: Colors.black,
-      appBar: AppBar(
-        backgroundColor: Colors.black,
-        foregroundColor: Colors.white,
-        title: const Text('Scanner de document'),
-        actions: [
-          // Bouton pour activer/désactiver l'overlay
-          IconButton(
-            icon: Icon(_showOverlay ? Icons.crop_free : Icons.crop_free_outlined),
-            onPressed: () {
-              setState(() {
-                _showOverlay = !_showOverlay;
-              });
-            },
-            tooltip: 'Afficher/Masquer le guide',
+    return Stack(
+      children: [
+        // Prévisualisation de la caméra
+        CameraPreview(_controller!),
+        
+        // Overlay de cadrage
+        if (_showOverlay)
+          CustomPaint(
+            painter: DocumentOverlayPainter(),
+            size: Size.infinite,
           ),
-          // Bouton pour activer/désactiver le redimensionnement automatique
-          IconButton(
-            icon: Icon(_autoResize ? Icons.auto_fix_high : Icons.auto_fix_normal),
-            onPressed: () {
-              setState(() {
-                _autoResize = !_autoResize;
-              });
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(_autoResize 
-                    ? 'Redimensionnement automatique activé' 
-                    : 'Redimensionnement automatique désactivé'),
-                  duration: const Duration(seconds: 1),
-                ),
-              );
-            },
-            tooltip: 'Redimensionnement automatique',
+        
+        // Indicateur de traitement
+        if (_isProcessing)
+          Container(
+            color: Colors.black54,
+            child: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  CircularProgressIndicator(
+                    color: Colors.white,
+                  ),
+                  SizedBox(height: ResponsiveService.getSpacing(context, baseSpacing: 16)),
+                  Text(
+                    'Traitement en cours...',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: ResponsiveService.getFontSize(context, baseSize: 16),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+
+  Widget _buildMobileControls() {
+    return Container(
+      padding: ResponsiveService.getScreenPadding(context),
+      child: Column(
+        children: [
+          // Indicateur de mode
+          Container(
+            padding: EdgeInsets.symmetric(
+              horizontal: ResponsiveService.getSpacing(context, baseSpacing: 16),
+              vertical: ResponsiveService.getSpacing(context, baseSpacing: 8),
+            ),
+            decoration: BoxDecoration(
+              color: Colors.black54,
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Text(
+              _autoResize ? 'Mode: Redimensionnement automatique' : 'Mode: Scan simple',
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: ResponsiveService.getFontSize(context, baseSize: 12),
+              ),
+            ),
+          ),
+          SizedBox(height: ResponsiveService.getSpacing(context, baseSpacing: 16)),
+          // Bouton de capture
+          FloatingActionButton.large(
+            onPressed: _isProcessing ? null : _captureAndProcess,
+            backgroundColor: _isProcessing ? Colors.grey : Colors.white,
+            foregroundColor: Colors.black,
+            child: Icon(
+              _isProcessing ? Icons.hourglass_empty : Icons.camera_alt,
+              size: ResponsiveService.getIconSize(context) * 1.6,
+            ),
           ),
         ],
       ),
-      body: Stack(
+    );
+  }
+
+  Widget _buildTabletControls() {
+    return ResponsiveService.responsiveCard(
+      context: context,
+      child: Column(
         children: [
-          // Prévisualisation de la caméra
-          CameraPreview(_controller!),
-          
-          // Overlay de guidage pour le document
-          if (_showOverlay)
-            CustomPaint(
-              painter: DocumentOverlayPainter(),
-              child: Container(),
+          Text(
+            'Scanner un document',
+            style: TextStyle(
+              fontSize: ResponsiveService.getFontSize(context, baseSize: 24),
+              fontWeight: FontWeight.bold,
             ),
+          ),
+          SizedBox(height: ResponsiveService.getSpacing(context, baseSpacing: 24)),
           
-          // Indicateur de traitement
-          if (_isProcessing)
-            Container(
-              color: Colors.black54,
-              child: const Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
+          // Options de scan
+          ResponsiveService.responsiveCard(
+            context: context,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Options de scan',
+                  style: TextStyle(
+                    fontSize: ResponsiveService.getFontSize(context, baseSize: 18),
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                SizedBox(height: ResponsiveService.getSpacing(context, baseSpacing: 16)),
+                
+                // Switch pour le redimensionnement automatique
+                Row(
                   children: [
-                    CircularProgressIndicator(
-                      color: Colors.white,
-                    ),
-                    SizedBox(height: 16),
-                    Text(
-                      'Traitement en cours...',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 16,
+                    Expanded(
+                      child: Text(
+                        'Redimensionnement automatique',
+                        style: TextStyle(
+                          fontSize: ResponsiveService.getFontSize(context, baseSize: 16),
+                        ),
                       ),
+                    ),
+                    Switch(
+                      value: _autoResize,
+                      onChanged: (value) {
+                        setState(() {
+                          _autoResize = value;
+                        });
+                      },
                     ),
                   ],
                 ),
-              ),
-            ),
-          
-          // Contrôles en bas
-          Positioned(
-            bottom: 32,
-            left: 0,
-            right: 0,
-            child: Column(
-              children: [
-                // Indicateur de mode
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                  decoration: BoxDecoration(
-                    color: Colors.black54,
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Text(
-                    _autoResize ? 'Mode: Redimensionnement automatique' : 'Mode: Scan simple',
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 12,
+                
+                SizedBox(height: ResponsiveService.getSpacing(context, baseSpacing: 8)),
+                
+                // Switch pour l'overlay
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        'Afficher le cadre de cadrage',
+                        style: TextStyle(
+                          fontSize: ResponsiveService.getFontSize(context, baseSize: 16),
+                        ),
+                      ),
                     ),
+                    Switch(
+                      value: _showOverlay,
+                      onChanged: (value) {
+                        setState(() {
+                          _showOverlay = value;
+                        });
+                      },
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          
+          SizedBox(height: ResponsiveService.getSpacing(context, baseSpacing: 24)),
+          
+          // Bouton de capture
+          ResponsiveService.responsiveButton(
+            context: context,
+            onPressed: _isProcessing ? null : _captureAndProcess,
+            backgroundColor: _isProcessing ? Colors.grey : Colors.blue[600],
+            foregroundColor: Colors.white,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  _isProcessing ? Icons.hourglass_empty : Icons.camera_alt,
+                  size: ResponsiveService.getIconSize(context),
+                ),
+                SizedBox(width: ResponsiveService.getSpacing(context, baseSpacing: 8)),
+                Text(
+                  _isProcessing ? 'Traitement...' : 'Scanner le document',
+                  style: TextStyle(
+                    fontSize: ResponsiveService.getFontSize(context, baseSize: 16),
+                    fontWeight: FontWeight.w500,
                   ),
                 ),
-                const SizedBox(height: 16),
-                // Bouton de capture
-                FloatingActionButton.large(
-                  onPressed: _isProcessing ? null : _captureAndProcess,
-                  backgroundColor: _isProcessing ? Colors.grey : Colors.white,
-                  foregroundColor: Colors.black,
-                  child: Icon(
-                    _isProcessing ? Icons.hourglass_empty : Icons.camera_alt,
-                    size: 32,
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDesktopControls() {
+    return ResponsiveService.responsiveCard(
+      context: context,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Scanner un document',
+            style: TextStyle(
+              fontSize: ResponsiveService.getFontSize(context, baseSize: 28),
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          SizedBox(height: ResponsiveService.getSpacing(context, baseSpacing: 24)),
+          
+          // Instructions
+          ResponsiveService.responsiveCard(
+            context: context,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Instructions',
+                  style: TextStyle(
+                    fontSize: ResponsiveService.getFontSize(context, baseSize: 18),
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                SizedBox(height: ResponsiveService.getSpacing(context, baseSpacing: 12)),
+                Text(
+                  '1. Placez le document dans le cadre de cadrage\n'
+                  '2. Assurez-vous que le document est bien éclairé\n'
+                  '3. Cliquez sur "Scanner" pour capturer l\'image\n'
+                  '4. Ajustez les filtres si nécessaire',
+                  style: TextStyle(
+                    fontSize: ResponsiveService.getFontSize(context, baseSize: 14),
+                    color: Colors.grey[700],
                   ),
                 ),
               ],
             ),
           ),
           
-          // Instructions en haut
-          Positioned(
-            top: 16,
-            left: 16,
-            right: 16,
-            child: Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: Colors.black54,
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: const Text(
-                'Placez le document dans le cadre et appuyez sur le bouton pour scanner',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 14,
+          SizedBox(height: ResponsiveService.getSpacing(context, baseSpacing: 24)),
+          
+          // Options de scan
+          ResponsiveService.responsiveCard(
+            context: context,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Options de scan',
+                  style: TextStyle(
+                    fontSize: ResponsiveService.getFontSize(context, baseSize: 18),
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
-                textAlign: TextAlign.center,
-              ),
+                SizedBox(height: ResponsiveService.getSpacing(context, baseSpacing: 16)),
+                
+                // Switch pour le redimensionnement automatique
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        'Redimensionnement automatique',
+                        style: TextStyle(
+                          fontSize: ResponsiveService.getFontSize(context, baseSize: 16),
+                        ),
+                      ),
+                    ),
+                    Switch(
+                      value: _autoResize,
+                      onChanged: (value) {
+                        setState(() {
+                          _autoResize = value;
+                        });
+                      },
+                    ),
+                  ],
+                ),
+                
+                SizedBox(height: ResponsiveService.getSpacing(context, baseSpacing: 8)),
+                
+                // Switch pour l'overlay
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        'Afficher le cadre de cadrage',
+                        style: TextStyle(
+                          fontSize: ResponsiveService.getFontSize(context, baseSize: 16),
+                        ),
+                      ),
+                    ),
+                    Switch(
+                      value: _showOverlay,
+                      onChanged: (value) {
+                        setState(() {
+                          _showOverlay = value;
+                        });
+                      },
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          
+          SizedBox(height: ResponsiveService.getSpacing(context, baseSpacing: 24)),
+          
+          // Bouton de capture
+          ResponsiveService.responsiveButton(
+            context: context,
+            onPressed: _isProcessing ? null : _captureAndProcess,
+            backgroundColor: _isProcessing ? Colors.grey : Colors.blue[600],
+            foregroundColor: Colors.white,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  _isProcessing ? Icons.hourglass_empty : Icons.camera_alt,
+                  size: ResponsiveService.getIconSize(context),
+                ),
+                SizedBox(width: ResponsiveService.getSpacing(context, baseSpacing: 8)),
+                Text(
+                  _isProcessing ? 'Traitement...' : 'Scanner le document',
+                  style: TextStyle(
+                    fontSize: ResponsiveService.getFontSize(context, baseSize: 16),
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  @override
+  void dispose() {
+    _controller?.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(
+          'Scanner un document',
+          style: TextStyle(
+            fontSize: ResponsiveService.getFontSize(context, baseSize: 20),
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        elevation: 0,
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: [Colors.blue[900]!, Colors.blue[700]!],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+          ),
+        ),
+      ),
+      body: ResponsiveService.responsiveBuilder(
+        context: context,
+        mobile: _buildMobileLayout(),
+        tablet: _buildTabletLayout(),
+        desktop: _buildDesktopLayout(),
       ),
     );
   }
