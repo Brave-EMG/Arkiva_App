@@ -27,6 +27,7 @@ import 'package:arkiva/services/backup_service.dart';
 import 'package:arkiva/services/version_service.dart';
 import 'package:open_filex/open_filex.dart';
 import 'package:flutter/services.dart';
+import 'package:arkiva/screens/adobe_scan_screen.dart';
 
 class FichiersScreen extends StatefulWidget {
   final Dossier dossier;
@@ -232,14 +233,24 @@ class _FichiersScreenState extends State<FichiersScreen> {
       final authStateService = context.read<AuthStateService>();
       final token = authStateService.token;
       if (token != null) {
+        // Debug: Afficher les informations du dossier
+        print('DEBUG: Dossier reçu: ${widget.dossier.nom}');
+        print('DEBUG: Dossier ID: ${widget.dossier.dossierId}');
+        print('DEBUG: Casier ID: ${widget.dossier.casierId}');
+        
         if (widget.dossier.dossierId == null) {
+          print('DEBUG: Erreur - dossierId est null');
           _scaffoldMessengerKey.currentState?.showSnackBar(
             const SnackBar(content: Text('Erreur: ID du dossier manquant.')),
           );
           setState(() => _isLoading = false);
           return;
         }
+        
+        print('DEBUG: Chargement des documents pour dossier ID: ${widget.dossier.dossierId}');
         final documents = await _documentService.getDocuments(token, widget.dossier.dossierId);
+        print('DEBUG: Documents chargés: ${documents.length}');
+        
         setState(() {
           _allDocuments = documents;
           _documents = documents;
@@ -247,6 +258,7 @@ class _FichiersScreenState extends State<FichiersScreen> {
         });
       }
     } catch (e) {
+      print('DEBUG: Erreur lors du chargement: $e');
       _scaffoldMessengerKey.currentState?.showSnackBar(
         SnackBar(content: Text('Erreur: ${e.toString()}')),
       );
@@ -1561,17 +1573,18 @@ class _FichiersScreenState extends State<FichiersScreen> {
               IconButton(
                 icon: const Icon(Icons.camera_alt, color: Colors.white),
                 onPressed: () async {
+                  // Lancer directement l'écran Adobe Scan
                   final scanEffectue = await Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => ScanDocumentScreen(dossier: widget.dossier),
+                      builder: (context) => AdobeScanScreen(dossier: widget.dossier),
                     ),
                   );
                   if (scanEffectue == true) {
                     await _loadDocuments();
                   }
                 },
-                tooltip: 'Scanner un document',
+                tooltip: 'Scanner un document (Adobe Scan)',
             ),
           ],
         ),
@@ -1911,6 +1924,27 @@ class _FichiersScreenState extends State<FichiersScreen> {
     return Column(
       children: [
         _buildModernSearchBar(),
+        // Affichage temporaire pour debug
+        if (_isLoading)
+          Container(
+            padding: const EdgeInsets.all(16),
+            child: const Center(
+              child: CircularProgressIndicator(),
+            ),
+          )
+        else
+          Container(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              children: [
+                Text('DEBUG: Dossier ID: ${widget.dossier.dossierId}'),
+                Text('DEBUG: Nom du dossier: ${widget.dossier.nom}'),
+                Text('DEBUG: Nombre de documents: ${_documents.length}'),
+                Text('DEBUG: Nombre total de documents: ${_allDocuments.length}'),
+                const SizedBox(height: 16),
+              ],
+            ),
+          ),
         Expanded(
           child: RefreshIndicator(
             onRefresh: _loadDocuments,

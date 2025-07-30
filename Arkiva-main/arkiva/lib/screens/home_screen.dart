@@ -23,6 +23,7 @@ import 'package:http/http.dart' as http;
 import 'package:arkiva/services/http_interceptor.dart';
 import 'dart:convert';
 import 'package:arkiva/config/api_config.dart';
+import 'package:arkiva/screens/adobe_scan_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -1114,6 +1115,13 @@ class _HomeScreenState extends State<HomeScreen> {
                     Colors.teal[600]!, 
                     'Restaurer des versions',
                     () => Navigator.pushNamed(context, '/restorations')
+                  ),
+                  _buildQuickAccessCard(
+                    'Scanner', 
+                    Icons.camera_alt, 
+                    Colors.red[600]!, 
+                    'Scanner un document',
+                    () => Navigator.push(context, MaterialPageRoute(builder: (context) => const AdobeScanScreen()))
                   ),
                 ],
               ),
