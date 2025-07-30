@@ -1583,72 +1583,11 @@ class _FichiersScreenState extends State<FichiersScreen> {
               end: Alignment.bottomCenter,
             ),
           ),
-          child: Column(
-            children: [
-              _buildModernSearchBar(),
-              Expanded(
-                child: RefreshIndicator(
-                  onRefresh: _loadDocuments,
-                  child: _filteredDocuments.isEmpty
-                      ? Center(
-                          child: _buildModernCard(
-                            color: Colors.blue,
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Icon(
-                                  Icons.description,
-                                  size: ResponsiveService.getIconSize(context) * 2,
-                                  color: Colors.blue[700],
-                                ),
-                                const SizedBox(height: 16),
-                                Text(
-                                  'Aucun document dans ce dossier',
-                                  style: TextStyle(
-                                    fontSize: ResponsiveService.getFontSize(context, baseSize: 20),
-                                    fontWeight: FontWeight.bold,
-                                    color: Colors.grey[800],
-                                  ),
-                                  textAlign: TextAlign.center,
-                                ),
-                                const SizedBox(height: 8),
-                                Text(
-                                  'Ajoutez votre premier document',
-                                  style: TextStyle(
-                                    color: Colors.grey[600],
-                                    fontSize: ResponsiveService.getFontSize(context, baseSize: 16),
-                                  ),
-                                  textAlign: TextAlign.center,
-                                ),
-                                const SizedBox(height: 24),
-                                _buildModernButton(
-                                  onPressed: _ajouterDocument,
-                                  backgroundColor: Colors.blue[600],
-                                  child: Row(
-                                    mainAxisSize: MainAxisSize.min,
-                                    children: [
-                                      const Icon(Icons.add),
-                                      const SizedBox(width: 8),
-                                      const Text('Ajouter un document'),
-                                    ],
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        )
-                      : GridView.builder(
-                          padding: ResponsiveService.getScreenPadding(context),
-                          gridDelegate: ResponsiveService.getResponsiveGridDelegate(context),
-                          itemCount: _filteredDocuments.length,
-                          itemBuilder: (context, index) {
-                            final document = _filteredDocuments[index];
-                            return _buildDocumentCard(document, index);
-                          },
-                        ),
-                ),
-              ),
-            ],
+          child: ResponsiveService.responsiveBuilder(
+            context: context,
+            mobile: _buildMobileLayout(),
+            tablet: _buildTabletLayout(),
+            desktop: _buildDesktopLayout(),
           ),
         ),
         floatingActionButton: FloatingActionButton.extended(
@@ -1965,6 +1904,215 @@ class _FichiersScreenState extends State<FichiersScreen> {
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildMobileLayout() {
+    return Column(
+      children: [
+        _buildModernSearchBar(),
+        Expanded(
+          child: RefreshIndicator(
+            onRefresh: _loadDocuments,
+            child: _filteredDocuments.isEmpty
+                ? Center(
+                    child: _buildModernCard(
+                      color: Colors.blue,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.description,
+                            size: ResponsiveService.getIconSize(context) * 2,
+                            color: Colors.blue[700],
+                          ),
+                          const SizedBox(height: 16),
+                          Text(
+                            'Aucun document dans ce dossier',
+                            style: TextStyle(
+                              fontSize: ResponsiveService.getFontSize(context, baseSize: 20),
+                              fontWeight: FontWeight.bold,
+                              color: Colors.grey[800],
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            'Ajoutez votre premier document',
+                            style: TextStyle(
+                              color: Colors.grey[600],
+                              fontSize: ResponsiveService.getFontSize(context, baseSize: 16),
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: 24),
+                          _buildModernButton(
+                            onPressed: _ajouterDocument,
+                            backgroundColor: Colors.blue[600],
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Icon(Icons.add),
+                                const SizedBox(width: 8),
+                                const Text('Ajouter un document'),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  )
+                : ListView.builder(
+                    padding: ResponsiveService.getScreenPadding(context),
+                    itemCount: _filteredDocuments.length,
+                    itemBuilder: (context, index) {
+                      final document = _filteredDocuments[index];
+                      return _buildDocumentCard(document, index);
+                    },
+                  ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildTabletLayout() {
+    return Column(
+      children: [
+        _buildModernSearchBar(),
+        Expanded(
+          child: RefreshIndicator(
+            onRefresh: _loadDocuments,
+            child: _filteredDocuments.isEmpty
+                ? Center(
+                    child: _buildModernCard(
+                      color: Colors.blue,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.description,
+                            size: ResponsiveService.getIconSize(context) * 2,
+                            color: Colors.blue[700],
+                          ),
+                          const SizedBox(height: 16),
+                          Text(
+                            'Aucun document dans ce dossier',
+                            style: TextStyle(
+                              fontSize: ResponsiveService.getFontSize(context, baseSize: 20),
+                              fontWeight: FontWeight.bold,
+                              color: Colors.grey[800],
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            'Ajoutez votre premier document',
+                            style: TextStyle(
+                              color: Colors.grey[600],
+                              fontSize: ResponsiveService.getFontSize(context, baseSize: 16),
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: 24),
+                          _buildModernButton(
+                            onPressed: _ajouterDocument,
+                            backgroundColor: Colors.blue[600],
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Icon(Icons.add),
+                                const SizedBox(width: 8),
+                                const Text('Ajouter un document'),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  )
+                : GridView.builder(
+                    padding: ResponsiveService.getScreenPadding(context),
+                    gridDelegate: ResponsiveService.getResponsiveGridDelegate(context),
+                    itemCount: _filteredDocuments.length,
+                    itemBuilder: (context, index) {
+                      final document = _filteredDocuments[index];
+                      return _buildDocumentCard(document, index);
+                    },
+                  ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildDesktopLayout() {
+    return Column(
+      children: [
+        _buildModernSearchBar(),
+        Expanded(
+          child: RefreshIndicator(
+            onRefresh: _loadDocuments,
+            child: _filteredDocuments.isEmpty
+                ? Center(
+                    child: _buildModernCard(
+                      color: Colors.blue,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.description,
+                            size: ResponsiveService.getIconSize(context) * 2,
+                            color: Colors.blue[700],
+                          ),
+                          const SizedBox(height: 16),
+                          Text(
+                            'Aucun document dans ce dossier',
+                            style: TextStyle(
+                              fontSize: ResponsiveService.getFontSize(context, baseSize: 20),
+                              fontWeight: FontWeight.bold,
+                              color: Colors.grey[800],
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            'Ajoutez votre premier document',
+                            style: TextStyle(
+                              color: Colors.grey[600],
+                              fontSize: ResponsiveService.getFontSize(context, baseSize: 16),
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: 24),
+                          _buildModernButton(
+                            onPressed: _ajouterDocument,
+                            backgroundColor: Colors.blue[600],
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Icon(Icons.add),
+                                const SizedBox(width: 8),
+                                const Text('Ajouter un document'),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  )
+                : GridView.builder(
+                    padding: ResponsiveService.getScreenPadding(context),
+                    gridDelegate: ResponsiveService.getResponsiveGridDelegate(context),
+                    itemCount: _filteredDocuments.length,
+                    itemBuilder: (context, index) {
+                      final document = _filteredDocuments[index];
+                      return _buildDocumentCard(document, index);
+                    },
+                  ),
+          ),
+        ),
+      ],
     );
   }
 } 
