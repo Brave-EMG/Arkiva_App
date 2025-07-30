@@ -249,14 +249,14 @@ class AdobeScanService {
     return area >= minArea;
   }
 
-  /// Amélioration Adobe Scan exacte
+  /// Amélioration Adobe Scan exacte (garde les couleurs)
   Future<File> enhanceImageAdobeStyle(File originalImage) async {
     try {
       final bytes = await originalImage.readAsBytes();
       img.Image? image = img.decodeImage(bytes);
       if (image == null) throw Exception('Impossible de décoder l\'image');
 
-      // Pipeline Adobe Scan exact
+      // Pipeline Adobe Scan exact (sans conversion noir/blanc)
       image = _correctPerspectiveAdobe(image);
       image = _enhanceContrastAdobe(image);
       image = _denoiseAdobe(image);
@@ -294,9 +294,9 @@ class AdobeScanService {
   /// Détection coins Adobe
   List<ScanPoint> _detectAdobeCorners(img.Image image) {
     final corners = <ScanPoint>[];
-    final gray = img.grayscale(image);
-    final width = gray.width;
-    final height = gray.height;
+    // Garder les couleurs originales pour la détection
+    final width = image.width;
+    final height = image.height;
     
     // Quadrants Adobe
     final quadrants = [
@@ -307,7 +307,7 @@ class AdobeScanService {
     ];
     
     for (final quadrant in quadrants) {
-      final corner = _findAdobeCorner(gray, quadrant[0], quadrant[1], quadrant[2], quadrant[3]);
+      final corner = _findAdobeCorner(image, quadrant[0], quadrant[1], quadrant[2], quadrant[3]);
       if (corner != null) {
         corners.add(corner);
       }
@@ -334,7 +334,7 @@ class AdobeScanService {
     return bestCorner;
   }
 
-  /// Gradient coin Adobe
+  /// Gradient coin Adobe (avec couleurs)
   double _calculateAdobeCornerGradient(img.Image image, int x, int y) {
     if (x < 2 || y < 2 || x >= image.width - 2 || y >= image.height - 2) {
       return 0;
@@ -350,6 +350,7 @@ class AdobeScanService {
     
     double gradient = 0;
     for (final neighbor in neighbors) {
+      // Calculer le gradient en utilisant les couleurs RGB
       gradient += (center.r - neighbor.r).abs() +
                   (center.g - neighbor.g).abs() +
                   (center.b - neighbor.b).abs();
@@ -358,7 +359,7 @@ class AdobeScanService {
     return gradient;
   }
 
-  /// Perspective Adobe
+  /// Perspective Adobe (garde les couleurs)
   img.Image _applyAdobePerspective(img.Image image, List<ScanPoint> corners) {
     corners.sort((a, b) {
       if (a.y != b.y) return a.y.compareTo(b.y);
@@ -377,6 +378,7 @@ class AdobeScanService {
         
         if (sourceX >= 0 && sourceX < image.width && 
             sourceY >= 0 && sourceY < image.height) {
+          // Garder les couleurs originales
           corrected.setPixel(x, y, image.getPixel(sourceX.round(), sourceY.round()));
         }
       }
@@ -413,34 +415,40 @@ class AdobeScanService {
             (p1.y - p2.y) * (p1.y - p2.y)).toDouble();
   }
 
-  /// Amélioration contraste Adobe
+  /// Amélioration contraste Adobe (garde les couleurs)
   img.Image _enhanceContrastAdobe(img.Image image) {
-    return img.adjustColor(image, contrast: 1.4); // Adobe style
+    // Améliorer le contraste sans perdre les couleurs
+    return img.adjustColor(image, 
+      contrast: 1.2,    // Contraste modéré
+      brightness: 1.05, // Légèrement plus lumineux
+      saturation: 1.1,  // Garder les couleurs
+    );
   }
 
-  /// Dénuiser Adobe
+  /// Dénuiser Adobe (garde les couleurs)
   img.Image _denoiseAdobe(img.Image image) {
-    // Filtre Adobe
-    return img.gaussianBlur(image, radius: 0.5);
+    // Filtre de réduction de bruit léger qui préserve les couleurs
+    return img.gaussianBlur(image, radius: 0.3);
   }
 
-  /// Netteté Adobe
+  /// Netteté Adobe (garde les couleurs)
   img.Image _sharpenAdobe(img.Image image) {
-    // Filtre de netteté Adobe
+    // Filtre de netteté qui préserve les couleurs
     final kernel = [
-      [0, -1, 0],
-      [-1, 5, -1],
-      [0, -1, 0]
+      [0, -0.5, 0],
+      [-0.5, 3, -0.5],
+      [0, -0.5, 0]
     ];
     return img.convolution(image, kernel);
   }
 
-  /// Optimisation OCR Adobe
+  /// Optimisation OCR Adobe (garde les couleurs)
   img.Image _optimizeForOCRAdobe(img.Image image) {
+    // Optimisation pour l'OCR tout en gardant les couleurs
     return img.adjustColor(image, 
-      contrast: 1.3,
-      brightness: 1.05,
-      saturation: 1.1,
+      contrast: 1.15,   // Contraste léger
+      brightness: 1.02, // Très légèrement plus lumineux
+      saturation: 1.05, // Garder les couleurs
     );
   }
 

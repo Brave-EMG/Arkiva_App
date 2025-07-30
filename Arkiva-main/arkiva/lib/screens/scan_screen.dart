@@ -121,6 +121,11 @@ class _ScanScreenState extends State<ScanScreen> {
     Navigator.pushNamed(context, '/adobe-scan', arguments: null);
   }
 
+  void _launchCamScanner() {
+    // TODO: Passer le dossier actuel
+    Navigator.pushNamed(context, '/camscanner', arguments: null);
+  }
+
   Widget _buildMobileLayout() {
     return ResponsiveService.responsiveCard(
       context: context,
