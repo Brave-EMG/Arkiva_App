@@ -9,11 +9,11 @@ import 'package:arkiva/services/auth_state_service.dart';
 import 'package:provider/provider.dart';
 
 class AdobeScanScreen extends StatefulWidget {
-  final Dossier dossier;
+  final Dossier? dossier;
   
   const AdobeScanScreen({
     super.key,
-    required this.dossier,
+    this.dossier,
   });
 
   @override
@@ -260,7 +260,7 @@ class _AdobeScanScreenState extends State<AdobeScanScreen> with TickerProviderSt
         await _uploadService.uploadScannedDocuments(
           token: token,
           files: [scanResult.enhancedImage],
-          dossierId: widget.dossier.dossierId!,
+          dossierId: widget.dossier?.dossierId,
           entrepriseId: entrepriseId,
         );
       }
