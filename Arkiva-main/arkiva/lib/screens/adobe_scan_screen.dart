@@ -8,6 +8,7 @@ import 'package:arkiva/models/dossier.dart';
 import 'package:arkiva/services/auth_state_service.dart';
 import 'package:provider/provider.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'dart:async'; // Added for Timer
 
 class AdobeScanScreen extends StatefulWidget {
   final Dossier? dossier;
@@ -29,28 +30,35 @@ class _AdobeScanScreenState extends State<AdobeScanScreen> with TickerProviderSt
   bool _isInitialized = false;
   bool _isProcessing = false;
   bool _isDocumentDetected = false;
+  bool _isAutoCaptureEnabled = true;
   Rectangle? _detectedRectangle;
   
-  // Animation pour le feedback visuel
+  // Animations Adobe Scan exactes
   late AnimationController _pulseController;
   late AnimationController _scanLineController;
+  late AnimationController _autoCaptureController;
   late Animation<double> _pulseAnimation;
   late Animation<Offset> _scanLineAnimation;
+  late Animation<double> _autoCaptureAnimation;
   
-  // Liste des documents scannés
-  final List<ScanResult> _scannedDocuments = [];
+  // Liste des documents scannés Adobe style
+  final List<AdobeScanResult> _scannedDocuments = [];
+  
+  // Auto-capture timer
+  Timer? _autoCaptureTimer;
+  int _stableDetectionCount = 0;
   
   @override
   void initState() {
     super.initState();
-    _initializeAnimations();
+    _initializeAdobeAnimations();
     _initializeCamera();
   }
 
-  void _initializeAnimations() {
-    // Animation de pulsation pour le cadre de détection
+  void _initializeAdobeAnimations() {
+    // Animation de pulsation Adobe
     _pulseController = AnimationController(
-      duration: const Duration(seconds: 2),
+      duration: const Duration(milliseconds: 1500),
       vsync: this,
     );
     _pulseAnimation = Tween<double>(
@@ -60,11 +68,10 @@ class _AdobeScanScreenState extends State<AdobeScanScreen> with TickerProviderSt
       parent: _pulseController,
       curve: Curves.easeInOut,
     ));
-    _pulseController.repeat(reverse: true);
 
-    // Animation de la ligne de scan
+    // Animation ligne de scan Adobe
     _scanLineController = AnimationController(
-      duration: const Duration(seconds: 3),
+      duration: const Duration(milliseconds: 2000),
       vsync: this,
     );
     _scanLineAnimation = Tween<Offset>(
@@ -74,15 +81,31 @@ class _AdobeScanScreenState extends State<AdobeScanScreen> with TickerProviderSt
       parent: _scanLineController,
       curve: Curves.easeInOut,
     ));
+
+    // Animation auto-capture Adobe
+    _autoCaptureController = AnimationController(
+      duration: const Duration(milliseconds: 1500),
+      vsync: this,
+    );
+    _autoCaptureAnimation = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(
+      parent: _autoCaptureController,
+      curve: Curves.easeInOut,
+    ));
+
+    // Démarrer les animations
+    _pulseController.repeat(reverse: true);
     _scanLineController.repeat();
   }
 
   Future<void> _initializeCamera() async {
     try {
-      // Demander les permissions avec une interface utilisateur claire
-      final hasPermissions = await _requestPermissionsWithUI();
+      // Demander les permissions Adobe style
+      final hasPermissions = await _requestAdobePermissions();
       if (!hasPermissions) {
-        throw Exception('Permissions non accordées');
+        throw Exception('Permissions Adobe non accordées');
       }
 
       // Initialiser la caméra
@@ -92,28 +115,27 @@ class _AdobeScanScreenState extends State<AdobeScanScreen> with TickerProviderSt
       }
 
       _controller = CameraController(
-        cameras.first,
+        cameras[0],
         ResolutionPreset.high,
         enableAudio: false,
-        imageFormatGroup: ImageFormatGroup.bgra8888,
       );
 
       await _controller!.initialize();
       
-      if (!mounted) return;
-
-      setState(() {
-        _isInitialized = true;
-      });
-
-      // Démarrer la détection automatique
-      _startDocumentDetection();
+      if (mounted) {
+        setState(() {
+          _isInitialized = true;
+        });
+        
+        // Démarrer la détection Adobe
+        _startAdobeDetection();
+      }
     } catch (e) {
-      debugPrint('Erreur lors de l\'initialisation de la caméra: $e');
+      debugPrint('Erreur initialisation Adobe: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Erreur lors de l\'initialisation: $e'),
+            content: Text('Erreur Adobe Scan: $e'),
             backgroundColor: Colors.red,
             duration: const Duration(seconds: 5),
             action: SnackBarAction(
@@ -126,33 +148,31 @@ class _AdobeScanScreenState extends State<AdobeScanScreen> with TickerProviderSt
     }
   }
 
-  Future<bool> _requestPermissionsWithUI() async {
+  Future<bool> _requestAdobePermissions() async {
     try {
-      // Vérifier d'abord les permissions actuelles
+      // Vérifier les permissions actuelles
       final cameraStatus = await Permission.camera.status;
       final storageStatus = await Permission.storage.status;
       final photosStatus = await Permission.photos.status;
-      final videosStatus = await Permission.videos.status;
 
-      // Si les permissions sont déjà accordées
       final hasCamera = cameraStatus.isGranted;
-      final hasStorage = storageStatus.isGranted || photosStatus.isGranted || videosStatus.isGranted;
-      
+      final hasStorage = storageStatus.isGranted || photosStatus.isGranted;
+
       if (hasCamera && hasStorage) {
         return true;
       }
 
-      // Afficher une boîte de dialogue pour expliquer pourquoi nous avons besoin des permissions
+      // Demander les permissions Adobe style
       final shouldRequest = await showDialog<bool>(
         context: context,
         barrierDismissible: false,
         builder: (context) => AlertDialog(
-          title: const Text('Permissions Requises'),
+          title: const Text('Adobe Scan - Permissions'),
           content: const Text(
-            'Cette fonctionnalité nécessite l\'accès à la caméra et au stockage pour scanner des documents.\n\n'
-            '• Caméra : Pour capturer les documents\n'
-            '• Stockage : Pour sauvegarder les documents scannés\n\n'
-            'Voulez-vous accorder ces permissions ?',
+            'Adobe Scan nécessite l\'accès à la caméra et au stockage pour scanner vos documents.\n\n'
+            '• Caméra : Détection automatique des documents\n'
+            '• Stockage : Sauvegarde des scans\n\n'
+            'Voulez-vous autoriser Adobe Scan ?',
           ),
           actions: [
             TextButton(
@@ -161,7 +181,11 @@ class _AdobeScanScreenState extends State<AdobeScanScreen> with TickerProviderSt
             ),
             ElevatedButton(
               onPressed: () => Navigator.of(context).pop(true),
-              child: const Text('Autoriser'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.green[600],
+                foregroundColor: Colors.white,
+              ),
+              child: const Text('Autoriser Adobe Scan'),
             ),
           ],
         ),
@@ -171,79 +195,62 @@ class _AdobeScanScreenState extends State<AdobeScanScreen> with TickerProviderSt
         return false;
       }
 
-      // Demander les permissions
-      final hasPermissions = await _adobeScanService.requestPermissions();
-      
-      if (!hasPermissions) {
-        // Afficher un message d'erreur détaillé si les permissions sont refusées
-        if (mounted) {
-          showDialog(
-            context: context,
-            builder: (context) => AlertDialog(
-              title: const Text('Permissions Refusées'),
-              content: const Text(
-                'Les permissions sont nécessaires pour utiliser cette fonctionnalité.\n\n'
-                'Pour activer les permissions :\n'
-                '1. Allez dans Paramètres > Applications\n'
-                '2. Trouvez cette application\n'
-                '3. Allez dans Permissions\n'
-                '4. Activez Caméra et Stockage',
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.of(context).pop(),
-                  child: const Text('OK'),
-                ),
-                ElevatedButton(
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                    openAppSettings();
-                  },
-                  child: const Text('Paramètres'),
-                ),
-              ],
-            ),
-          );
-        }
-      }
-
-      return hasPermissions;
+      return await _adobeScanService.requestAdobePermissions();
     } catch (e) {
-      debugPrint('Erreur lors de la demande de permissions: $e');
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Erreur lors de la demande de permissions: $e'),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
+      debugPrint('Erreur permissions Adobe: $e');
       return false;
     }
   }
 
-  void _startDocumentDetection() {
+  void _startAdobeDetection() {
     if (_controller == null || !_isInitialized) return;
 
-    _controller!.startImageStream((CameraImage image) {
-      _detectDocumentInStream(image);
+    _controller!.startImageStream((image) {
+      _detectAdobeDocument(image);
     });
   }
 
-  void _detectDocumentInStream(CameraImage image) {
+  void _detectAdobeDocument(CameraImage image) {
     if (_isProcessing) return;
 
-    _adobeScanService.detectDocumentEdges(image).then((rectangle) {
+    _adobeScanService.detectDocumentEdgesRealTime(image).then((rectangle) {
       if (mounted) {
         setState(() {
           _detectedRectangle = rectangle;
+          final wasDetected = _isDocumentDetected;
           _isDocumentDetected = rectangle != null;
+          
+          // Gestion auto-capture Adobe
+          if (_isDocumentDetected && !wasDetected) {
+            _stableDetectionCount++;
+            if (_stableDetectionCount >= 3 && _isAutoCaptureEnabled) {
+              _startAutoCapture();
+            }
+          } else if (!_isDocumentDetected) {
+            _stableDetectionCount = 0;
+            _cancelAutoCapture();
+          }
         });
       }
     });
   }
 
-  Future<void> _captureDocument() async {
+  void _startAutoCapture() {
+    _cancelAutoCapture();
+    _autoCaptureTimer = Timer(const Duration(milliseconds: 1500), () {
+      if (_isDocumentDetected && !_isProcessing) {
+        _captureAdobeDocument();
+      }
+    });
+    _autoCaptureController.forward();
+  }
+
+  void _cancelAutoCapture() {
+    _autoCaptureTimer?.cancel();
+    _autoCaptureController.reverse();
+  }
+
+  Future<void> _captureAdobeDocument() async {
     if (_controller == null || !_isInitialized || _isProcessing) return;
 
     setState(() {
@@ -254,29 +261,32 @@ class _AdobeScanScreenState extends State<AdobeScanScreen> with TickerProviderSt
       // Arrêter le stream pour la capture
       await _controller!.stopImageStream();
 
-      // Capturer l'image
+      // Capturer l'image Adobe style
       final image = await _controller!.takePicture();
       
       // Traiter avec Adobe Scan
-      final scanResult = await _adobeScanService.processDocumentScan(File(image.path));
+      final scanResult = await _adobeScanService.processAdobeScan(
+        File(image.path),
+        _detectedRectangle,
+      );
       
       if (mounted) {
         setState(() {
           _scannedDocuments.add(scanResult);
         });
 
-        // Afficher le feedback
-        _showScanFeedback(scanResult);
+        // Feedback Adobe style
+        _showAdobeFeedback(scanResult);
       }
 
-      // Redémarrer la détection
-      _startDocumentDetection();
+      // Redémarrer la détection Adobe
+      _startAdobeDetection();
     } catch (e) {
-      debugPrint('Erreur lors de la capture: $e');
+      debugPrint('Erreur capture Adobe: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Erreur lors de la capture: $e'),
+            content: Text('Erreur Adobe Scan: $e'),
             backgroundColor: Colors.red,
           ),
         );
@@ -290,29 +300,29 @@ class _AdobeScanScreenState extends State<AdobeScanScreen> with TickerProviderSt
     }
   }
 
-  void _showScanFeedback(ScanResult scanResult) {
+  void _showAdobeFeedback(AdobeScanResult scanResult) {
     String message;
     Color backgroundColor;
     IconData icon;
 
-    switch (scanResult.scanQuality) {
+    switch (scanResult.quality) {
       case ScanQuality.excellent:
-        message = 'Scan excellent ! Texte parfaitement détecté.';
+        message = 'Excellent scan !';
         backgroundColor = Colors.green;
         icon = Icons.check_circle;
         break;
       case ScanQuality.good:
-        message = 'Scan de bonne qualité.';
+        message = 'Bon scan !';
         backgroundColor = Colors.blue;
-        icon = Icons.check;
+        icon = Icons.check_circle_outline;
         break;
       case ScanQuality.fair:
-        message = 'Scan acceptable. Vérifiez la qualité.';
+        message = 'Scan acceptable';
         backgroundColor = Colors.orange;
         icon = Icons.warning;
         break;
       case ScanQuality.poor:
-        message = 'Scan de faible qualité. Recommencez.';
+        message = 'Scan de faible qualité';
         backgroundColor = Colors.red;
         icon = Icons.error;
         break;
@@ -333,65 +343,83 @@ class _AdobeScanScreenState extends State<AdobeScanScreen> with TickerProviderSt
     );
   }
 
-  Future<void> _uploadScannedDocuments() async {
-    if (_scannedDocuments.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Aucun document à uploader'),
-          backgroundColor: Colors.orange,
-        ),
-      );
-      return;
-    }
-
-    setState(() {
-      _isProcessing = true;
-    });
+  Future<void> _uploadAdobeDocuments() async {
+    if (_scannedDocuments.isEmpty) return;
 
     try {
-      final authStateService = context.read<AuthStateService>();
-      final token = authStateService.token;
-      final entrepriseId = authStateService.entrepriseId;
+      final authState = Provider.of<AuthStateService>(context, listen: false);
+      final token = authState.token;
+      final entrepriseId = authState.entrepriseId;
 
       if (token == null || entrepriseId == null) {
-        throw Exception('Token ou ID entreprise manquant');
+        throw Exception('Non authentifié');
       }
 
-      // Uploader tous les documents scannés
-      for (final scanResult in _scannedDocuments) {
-        await _uploadService.uploadScannedDocuments(
-          token: token,
-          files: [scanResult.enhancedImage],
-          dossierId: widget.dossier?.dossierId ?? 0,
-          entrepriseId: entrepriseId,
-        );
-      }
+      // Upload Adobe style
+      await _uploadService.uploadScannedDocuments(
+        token: token,
+        files: _scannedDocuments.map((doc) => doc.processedImage).toList(),
+        dossierId: widget.dossier?.dossierId,
+        entrepriseId: entrepriseId,
+      );
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('${_scannedDocuments.length} documents uploadés avec succès !'),
+          const SnackBar(
+            content: Text('Documents Adobe Scan uploadés avec succès !'),
             backgroundColor: Colors.green,
           ),
         );
         
-        // Retourner à l'écran précédent
-        Navigator.pop(context, true);
+        // Retour à l'écran précédent
+        Navigator.of(context).pop(true);
       }
     } catch (e) {
+      debugPrint('Erreur upload Adobe: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Erreur lors de l\'upload: $e'),
+            content: Text('Erreur upload: $e'),
             backgroundColor: Colors.red,
           ),
         );
       }
-    } finally {
-      setState(() {
-        _isProcessing = false;
-      });
     }
+  }
+
+  void _toggleAutoCapture() {
+    setState(() {
+      _isAutoCaptureEnabled = !_isAutoCaptureEnabled;
+    });
+  }
+
+  void _testAdobePermissions() async {
+    final hasPermissions = await _requestAdobePermissions();
+    if (hasPermissions) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Permissions Adobe Scan accordées !'),
+          backgroundColor: Colors.green,
+        ),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Permissions Adobe Scan refusées'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
+  @override
+  void dispose() {
+    _pulseController.dispose();
+    _scanLineController.dispose();
+    _autoCaptureController.dispose();
+    _autoCaptureTimer?.cancel();
+    _controller?.dispose();
+    super.dispose();
   }
 
   @override
@@ -402,49 +430,56 @@ class _AdobeScanScreenState extends State<AdobeScanScreen> with TickerProviderSt
         backgroundColor: Colors.green[600],
         foregroundColor: Colors.white,
         actions: [
-          // Bouton de test des permissions
+          // Bouton auto-capture Adobe
+          IconButton(
+            icon: Icon(_isAutoCaptureEnabled ? Icons.auto_awesome : Icons.auto_awesome_outlined),
+            onPressed: _toggleAutoCapture,
+            tooltip: 'Auto-capture Adobe',
+          ),
+          // Bouton permissions Adobe
           IconButton(
             icon: const Icon(Icons.security),
-            onPressed: _testPermissions,
-            tooltip: 'Tester les permissions',
+            onPressed: _testAdobePermissions,
+            tooltip: 'Permissions Adobe',
           ),
+          // Bouton upload Adobe
           if (_scannedDocuments.isNotEmpty)
             IconButton(
               icon: const Icon(Icons.upload),
-              onPressed: _isProcessing ? null : _uploadScannedDocuments,
-              tooltip: 'Uploader les documents',
+              onPressed: _isProcessing ? null : _uploadAdobeDocuments,
+              tooltip: 'Upload Adobe Scan',
             ),
         ],
       ),
-      body: _buildBody(),
+      body: _buildAdobeBody(),
     );
   }
 
-  Widget _buildBody() {
+  Widget _buildAdobeBody() {
     if (!_isInitialized) {
-      return _buildLoadingView();
+      return _buildAdobeLoadingView();
     }
 
     return Column(
       children: [
-        // Vue caméra avec overlay Adobe Scan
+        // Vue caméra Adobe
         Expanded(
-          child: _buildCameraView(),
+          child: _buildAdobeCameraView(),
         ),
-        // Contrôles
-        _buildControls(),
+        // Contrôles Adobe
+        _buildAdobeControls(),
       ],
     );
   }
 
-  Widget _buildLoadingView() {
+  Widget _buildAdobeLoadingView() {
     return Container(
       color: Colors.black,
       child: const Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            CircularProgressIndicator(color: Colors.white),
+            CircularProgressIndicator(color: Colors.green),
             SizedBox(height: 16),
             Text(
               'Initialisation Adobe Scan...',
@@ -456,7 +491,7 @@ class _AdobeScanScreenState extends State<AdobeScanScreen> with TickerProviderSt
     );
   }
 
-  Widget _buildCameraView() {
+  Widget _buildAdobeCameraView() {
     if (_controller == null) {
       return Container(color: Colors.black);
     }
@@ -467,127 +502,96 @@ class _AdobeScanScreenState extends State<AdobeScanScreen> with TickerProviderSt
         CameraPreview(_controller!),
         
         // Overlay Adobe Scan
-        _buildAdobeScanOverlay(),
+        _buildAdobeOverlay(),
         
-        // Ligne de scan animée
+        // Ligne de scan Adobe
         if (_isDocumentDetected)
-          _buildScanLine(),
+          _buildAdobeScanLine(),
+        
+        // Auto-capture indicator
+        if (_isAutoCaptureEnabled && _isDocumentDetected)
+          _buildAdobeAutoCaptureIndicator(),
       ],
     );
   }
 
-  Widget _buildAdobeScanOverlay() {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.black.withOpacity(0.3),
-      ),
-      child: Stack(
-        children: [
-          // Zone de détection
-          if (_detectedRectangle != null)
-            Positioned(
-              left: _detectedRectangle!.x.toDouble(),
-              top: _detectedRectangle!.y.toDouble(),
-              child: AnimatedBuilder(
-                animation: _pulseAnimation,
-                builder: (context, child) {
-                  return Transform.scale(
-                    scale: _pulseAnimation.value,
-                    child: Container(
-                      width: _detectedRectangle!.width.toDouble(),
-                      height: _detectedRectangle!.height.toDouble(),
-                      decoration: BoxDecoration(
-                        border: Border.all(
-                          color: Colors.green,
-                          width: 3,
-                        ),
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                    ),
-                  );
-                },
-              ),
-            ),
-          
-          // Instructions
-          Positioned(
-            top: 50,
-            left: 0,
-            right: 0,
-            child: Center(
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                decoration: BoxDecoration(
-                  color: Colors.black.withOpacity(0.7),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Text(
-                  _isDocumentDetected 
-                    ? 'Document détecté ! Appuyez pour scanner'
-                    : 'Placez un document dans le cadre',
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ),
-            ),
+  Widget _buildAdobeOverlay() {
+    return AnimatedBuilder(
+      animation: _pulseAnimation,
+      builder: (context, child) {
+        return CustomPaint(
+          painter: AdobeScanOverlayPainter(
+            detectedRectangle: _detectedRectangle,
+            isDocumentDetected: _isDocumentDetected,
+            pulseScale: _pulseAnimation.value,
           ),
-          
-          // Compteur de documents
-          Positioned(
-            top: 100,
-            right: 20,
+        );
+      },
+    );
+  }
+
+  Widget _buildAdobeScanLine() {
+    return AnimatedBuilder(
+      animation: _scanLineAnimation,
+      builder: (context, child) {
+        return SlideTransition(
+          position: _scanLineAnimation,
+          child: Container(
+            height: 2,
+            color: Colors.green,
             child: Container(
-              padding: const EdgeInsets.all(8),
+              height: 2,
               decoration: BoxDecoration(
-                color: Colors.blue.withOpacity(0.8),
-                borderRadius: BorderRadius.circular(20),
-              ),
-              child: Text(
-                '${_scannedDocuments.length} docs',
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
+                gradient: LinearGradient(
+                  colors: [Colors.green, Colors.transparent, Colors.green],
                 ),
               ),
             ),
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 
-  Widget _buildScanLine() {
-    return Positioned(
-      left: 0,
-      right: 0,
-      child: SlideTransition(
-        position: _scanLineAnimation,
-        child: Container(
-          height: 2,
-          color: Colors.green,
-        ),
-      ),
+  Widget _buildAdobeAutoCaptureIndicator() {
+    return AnimatedBuilder(
+      animation: _autoCaptureAnimation,
+      builder: (context, child) {
+        return Positioned(
+          top: 50,
+          right: 20,
+          child: Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: Colors.green.withOpacity(_autoCaptureAnimation.value),
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: const Icon(
+              Icons.camera_alt,
+              color: Colors.white,
+              size: 20,
+            ),
+          ),
+        );
+      },
     );
   }
 
-  Widget _buildControls() {
+  Widget _buildAdobeControls() {
     return Container(
       padding: const EdgeInsets.all(20),
       color: Colors.grey[100],
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
-          // Bouton de capture
+          // Bouton capture Adobe
           GestureDetector(
-            onTap: _isProcessing ? null : _captureDocument,
+            onTap: _isProcessing ? null : _captureAdobeDocument,
             child: Container(
               width: 80,
               height: 80,
               decoration: BoxDecoration(
-                color: _isDocumentDetected ? Colors.green : Colors.grey,
+                color: _isProcessing ? Colors.grey : Colors.green[600],
                 shape: BoxShape.circle,
                 border: Border.all(color: Colors.white, width: 4),
                 boxShadow: [
@@ -606,156 +610,70 @@ class _AdobeScanScreenState extends State<AdobeScanScreen> with TickerProviderSt
             ),
           ),
           
-          // Bouton de prévisualisation
-          if (_scannedDocuments.isNotEmpty)
-            IconButton(
-              onPressed: () => _showScannedDocuments(),
-              icon: const Icon(Icons.preview, size: 30),
-              tooltip: 'Voir les documents scannés',
-            ),
-        ],
-      ),
-    );
-  }
-
-  void _showScannedDocuments() {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      builder: (context) => _buildScannedDocumentsSheet(),
-    );
-  }
-
-  Widget _buildScannedDocumentsSheet() {
-    return Container(
-      height: MediaQuery.of(context).size.height * 0.7,
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                'Documents scannés (${_scannedDocuments.length})',
-                style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
+          // Compteur Adobe
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(20),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.1),
+                  blurRadius: 5,
+                  offset: const Offset(0, 2),
                 ),
+              ],
+            ),
+            child: Text(
+              '${_scannedDocuments.length}',
+              style: const TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Colors.green,
               ),
-              IconButton(
-                onPressed: () => Navigator.pop(context),
-                icon: const Icon(Icons.close),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          Expanded(
-            child: ListView.builder(
-              itemCount: _scannedDocuments.length,
-              itemBuilder: (context, index) {
-                final scanResult = _scannedDocuments[index];
-                return _buildScannedDocumentTile(scanResult, index);
-              },
             ),
           ),
         ],
       ),
     );
   }
+}
 
-  Widget _buildScannedDocumentTile(ScanResult scanResult, int index) {
-    return Card(
-      margin: const EdgeInsets.only(bottom: 8),
-      child: ListTile(
-        leading: Container(
-          width: 50,
-          height: 50,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(8),
-            image: DecorationImage(
-              image: FileImage(scanResult.enhancedImage),
-              fit: BoxFit.cover,
-            ),
-          ),
-        ),
-        title: Text('Document ${index + 1}'),
-        subtitle: Text(
-          'Qualité: ${_getQualityText(scanResult.scanQuality)}\n'
-          'Texte détecté: ${scanResult.ocrText.length} caractères',
-        ),
-        trailing: Icon(
-          _getQualityIcon(scanResult.scanQuality),
-          color: _getQualityColor(scanResult.scanQuality),
-        ),
-      ),
+/// Painter pour l'overlay Adobe Scan
+class AdobeScanOverlayPainter extends CustomPainter {
+  final Rectangle? detectedRectangle;
+  final bool isDocumentDetected;
+  final double pulseScale;
+
+  AdobeScanOverlayPainter({
+    this.detectedRectangle,
+    required this.isDocumentDetected,
+    required this.pulseScale,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    if (detectedRectangle == null) return;
+
+    final paint = Paint()
+      ..color = isDocumentDetected ? Colors.green : Colors.grey
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 3.0 * pulseScale;
+
+    final rect = Rect.fromLTWH(
+      detectedRectangle!.x.toDouble(),
+      detectedRectangle!.y.toDouble(),
+      detectedRectangle!.width.toDouble(),
+      detectedRectangle!.height.toDouble(),
     );
-  }
 
-  String _getQualityText(ScanQuality quality) {
-    switch (quality) {
-      case ScanQuality.excellent:
-        return 'Excellent';
-      case ScanQuality.good:
-        return 'Bon';
-      case ScanQuality.fair:
-        return 'Acceptable';
-      case ScanQuality.poor:
-        return 'Faible';
-    }
-  }
-
-  IconData _getQualityIcon(ScanQuality quality) {
-    switch (quality) {
-      case ScanQuality.excellent:
-        return Icons.check_circle;
-      case ScanQuality.good:
-        return Icons.check;
-      case ScanQuality.fair:
-        return Icons.warning;
-      case ScanQuality.poor:
-        return Icons.error;
-    }
-  }
-
-  Color _getQualityColor(ScanQuality quality) {
-    switch (quality) {
-      case ScanQuality.excellent:
-        return Colors.green;
-      case ScanQuality.good:
-        return Colors.blue;
-      case ScanQuality.fair:
-        return Colors.orange;
-      case ScanQuality.poor:
-        return Colors.red;
-    }
-  }
-
-  void _testPermissions() async {
-    final hasPermissions = await _requestPermissionsWithUI();
-    if (hasPermissions) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Permissions accordées !'),
-          backgroundColor: Colors.green,
-        ),
-      );
-    } else {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Permissions refusées. Veuillez les activer dans les paramètres.'),
-          backgroundColor: Colors.red,
-        ),
-      );
-    }
+    canvas.drawRect(rect, paint);
   }
 
   @override
-  void dispose() {
-    _pulseController.dispose();
-    _scanLineController.dispose();
-    _controller?.dispose();
-    _adobeScanService.dispose();
-    super.dispose();
+  bool shouldRepaint(AdobeScanOverlayPainter oldDelegate) {
+    return oldDelegate.detectedRectangle != detectedRectangle ||
+           oldDelegate.isDocumentDetected != isDocumentDetected ||
+           oldDelegate.pulseScale != pulseScale;
   }
 } 

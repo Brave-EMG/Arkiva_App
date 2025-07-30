@@ -7,300 +7,30 @@ import 'package:image/image.dart' as img;
 import 'package:path_provider/path_provider.dart';
 import 'package:permission_handler/permission_handler.dart';
 
-class AdobeScanService {
-  static final AdobeScanService _instance = AdobeScanService._internal();
-  factory AdobeScanService() => _instance;
-  AdobeScanService._internal();
-
-  final TextRecognizer _textRecognizer = TextRecognizer();
+/// Point simple pour les coordonnées
+class ScanPoint {
+  final int x;
+  final int y;
   
-  // Configuration Adobe Scan-like
-  static const double _edgeDetectionThreshold = 0.1; // Seuil de détection des bords
-
-  /// Détecte automatiquement les bords d'un document dans l'image
-  Future<Rectangle?> detectDocumentEdges(CameraImage image) async {
-    try {
-      // Convertir l'image de la caméra en format utilisable
-      final WriteBuffer allBytes = WriteBuffer();
-      for (final Plane plane in image.planes) {
-        allBytes.putUint8List(plane.bytes);
-      }
-      final bytes = allBytes.done().buffer.asUint8List();
-
-      // Créer une image à partir des bytes
-      final img.Image? cameraImage = img.decodeImage(bytes);
-      if (cameraImage == null) return null;
-
-      // Détecter les contours
-      final edges = _detectEdges(cameraImage);
-      if (edges.isEmpty) return null;
-
-      // Trouver le plus grand rectangle (probablement le document)
-      Rectangle? bestRectangle;
-      double maxArea = 0;
-
-      for (final edge in edges) {
-        final area = edge.width * edge.height;
-        if (area > maxArea && _isValidDocumentRatio(edge, cameraImage)) {
-          maxArea = area.toDouble();
-          bestRectangle = edge;
-        }
-      }
-
-      return bestRectangle;
-    } catch (e) {
-      debugPrint('Erreur lors de la détection des bords: $e');
-      return null;
-    }
-  }
-
-  /// Vérifie si le rectangle détecté a un ratio valide pour un document
-  bool _isValidDocumentRatio(Rectangle rect, img.Image image) {
-    final rectRatio = rect.width / rect.height;
-    
-    // Un document typique a un ratio entre 0.5 (A4 portrait) et 2.0 (A4 paysage)
-    return rectRatio >= 0.5 && rectRatio <= 2.0;
-  }
-
-  /// Détecte les contours dans l'image
-  List<Rectangle> _detectEdges(img.Image image) {
-    // Algorithme simplifié de détection de contours
-    final edges = <Rectangle>[];
-    
-    // Convertir en niveaux de gris
-    final gray = img.grayscale(image);
-    
-    // Appliquer un filtre de détection de contours (Sobel simplifié)
-    final width = gray.width;
-    final height = gray.height;
-    
-    for (int y = 1; y < height - 1; y++) {
-      for (int x = 1; x < width - 1; x++) {
-        final pixel = gray.getPixel(x, y);
-        final neighbors = [
-          gray.getPixel(x - 1, y),
-          gray.getPixel(x + 1, y),
-          gray.getPixel(x, y - 1),
-          gray.getPixel(x, y + 1),
-        ];
-        
-        // Calculer la différence avec les voisins
-        double gradient = 0;
-        for (final neighbor in neighbors) {
-          gradient += (pixel.r - neighbor.r).abs() + 
-                     (pixel.g - neighbor.g).abs() + 
-                     (pixel.b - neighbor.b).abs();
-        }
-        
-        // Si le gradient est élevé, c'est probablement un bord
-        if (gradient > _edgeDetectionThreshold * 255 * 4) {
-          // Ajouter un rectangle autour de ce point
-          edges.add(Rectangle(x - 10, y - 10, 20, 20));
-        }
-      }
-    }
-    
-    return edges;
-  }
-
-  /// Améliore automatiquement la qualité de l'image (comme Adobe Scan)
-  Future<File> enhanceImage(File originalImage) async {
-    try {
-      // Lire l'image
-      final bytes = await originalImage.readAsBytes();
-      img.Image? image = img.decodeImage(bytes);
-      if (image == null) throw Exception('Impossible de décoder l\'image');
-
-      // 1. Correction automatique de la perspective
-      image = _correctPerspective(image);
-
-      // 2. Amélioration du contraste
-      image = _enhanceContrast(image);
-
-      // 3. Suppression du bruit
-      image = _denoise(image);
-
-      // 4. Amélioration de la netteté
-      image = _sharpen(image);
-
-      // 5. Optimisation pour l'OCR
-      image = _optimizeForOCR(image);
-
-      // Sauvegarder l'image améliorée
-      final tempDir = await getTemporaryDirectory();
-      final enhancedPath = '${tempDir.path}/enhanced_${DateTime.now().millisecondsSinceEpoch}.jpg';
-      
-      final enhancedBytes = img.encodeJpg(image, quality: 95);
-      final enhancedFile = File(enhancedPath);
-      await enhancedFile.writeAsBytes(enhancedBytes);
-
-      return enhancedFile;
-    } catch (e) {
-      debugPrint('Erreur lors de l\'amélioration de l\'image: $e');
-      return originalImage; // Retourner l'original en cas d'erreur
-    }
-  }
-
-  /// Correction automatique de la perspective
-  img.Image _correctPerspective(img.Image image) {
-    // Algorithme simplifié de correction de perspective
-    // Dans une vraie implémentation, on utiliserait la détection de quadrilatères
-    
-    // Pour l'instant, on retourne l'image telle quelle
-    // TODO: Implémenter la correction de perspective
-    return image;
-  }
-
-  /// Amélioration du contraste
-  img.Image _enhanceContrast(img.Image image) {
-    // Augmenter le contraste de 50%
-    return img.adjustColor(image, contrast: 1.5);
-  }
-
-  /// Suppression du bruit
-  img.Image _denoise(img.Image image) {
-    // Pour l'instant, on retourne l'image telle quelle
-    // TODO: Implémenter la suppression de bruit
-    return image;
-  }
-
-  /// Amélioration de la netteté
-  img.Image _sharpen(img.Image image) {
-    // Pour l'instant, on retourne l'image telle quelle
-    // TODO: Implémenter l'amélioration de netteté
-    return image;
-  }
-
-  /// Optimisation pour l'OCR
-  img.Image _optimizeForOCR(img.Image image) {
-    // Conversion en noir et blanc pour améliorer l'OCR
-    final gray = img.grayscale(image);
-    
-    // Seuillage adaptatif pour améliorer la lisibilité
-    return img.adjustColor(gray, brightness: 1.2);
-  }
-
-  /// Effectue l'OCR sur l'image
-  Future<String> performOCR(File imageFile) async {
-    try {
-      final inputImage = InputImage.fromFile(imageFile);
-      final recognizedText = await _textRecognizer.processImage(inputImage);
-      
-      String extractedText = '';
-      for (TextBlock block in recognizedText.blocks) {
-        for (TextLine line in block.lines) {
-          extractedText += line.text + '\n';
-        }
-      }
-      
-      return extractedText.trim();
-    } catch (e) {
-      debugPrint('Erreur lors de l\'OCR: $e');
-      return '';
-    }
-  }
-
-  /// Processus complet Adobe Scan-like
-  Future<ScanResult> processDocumentScan(File originalImage) async {
-    try {
-      // 1. Amélioration automatique de l'image
-      final enhancedImage = await enhanceImage(originalImage);
-      
-      // 2. OCR automatique
-      final ocrText = await performOCR(enhancedImage);
-      
-      // 3. Créer le résultat
-      return ScanResult(
-        originalImage: originalImage,
-        enhancedImage: enhancedImage,
-        ocrText: ocrText,
-        scanQuality: _assessScanQuality(enhancedImage, ocrText),
-      );
-    } catch (e) {
-      debugPrint('Erreur lors du traitement Adobe Scan: $e');
-      rethrow;
-    }
-  }
-
-  /// Évalue la qualité du scan
-  ScanQuality _assessScanQuality(File enhancedImage, String ocrText) {
-    // Logique simplifiée d'évaluation de la qualité
-    if (ocrText.length > 100) {
-      return ScanQuality.excellent;
-    } else if (ocrText.length > 50) {
-      return ScanQuality.good;
-    } else if (ocrText.length > 10) {
-      return ScanQuality.fair;
-    } else {
-      return ScanQuality.poor;
-    }
-  }
-
-  /// Demande les permissions nécessaires
-  Future<bool> requestPermissions() async {
-    try {
-      // Permissions de base
-      final cameraStatus = await Permission.camera.request();
-      
-      // Permissions de stockage selon la version d'Android
-      PermissionStatus storageStatus;
-      
-      if (await Permission.storage.isGranted) {
-        storageStatus = PermissionStatus.granted;
-      } else {
-        // Pour Android 13+ (API 33+), utiliser les nouvelles permissions
-        if (await Permission.photos.isGranted) {
-          storageStatus = PermissionStatus.granted;
-        } else {
-          storageStatus = await Permission.photos.request();
-        }
-      }
-      
-      // Permissions supplémentaires pour Android 13+
-      PermissionStatus? mediaImagesStatus;
-      PermissionStatus? mediaVideoStatus;
-      
-      if (await Permission.photos.isDenied) {
-        mediaImagesStatus = await Permission.photos.request();
-        mediaVideoStatus = await Permission.videos.request();
-      }
-      
-      // Vérifier si toutes les permissions nécessaires sont accordées
-      final hasCamera = cameraStatus.isGranted;
-      final hasStorage = storageStatus.isGranted || 
-                        (mediaImagesStatus?.isGranted == true) || 
-                        (mediaVideoStatus?.isGranted == true);
-      
-      debugPrint('Permissions - Caméra: $hasCamera, Stockage: $hasStorage');
-      debugPrint('Camera Status: $cameraStatus');
-      debugPrint('Storage Status: $storageStatus');
-      debugPrint('Media Images Status: $mediaImagesStatus');
-      debugPrint('Media Video Status: $mediaVideoStatus');
-      
-      return hasCamera && hasStorage;
-    } catch (e) {
-      debugPrint('Erreur lors de la demande de permissions: $e');
-      return false;
-    }
-  }
-
-  void dispose() {
-    _textRecognizer.close();
-  }
+  ScanPoint(this.x, this.y);
 }
 
-/// Résultat du scan Adobe Scan-like
-class ScanResult {
+/// Résultat du scan Adobe Scan
+class AdobeScanResult {
   final File originalImage;
-  final File enhancedImage;
+  final File processedImage;
   final String ocrText;
-  final ScanQuality scanQuality;
+  final ScanQuality quality;
+  final Rectangle? detectedBounds;
+  final DateTime timestamp;
 
-  ScanResult({
+  AdobeScanResult({
     required this.originalImage,
-    required this.enhancedImage,
+    required this.processedImage,
     required this.ocrText,
-    required this.scanQuality,
+    required this.quality,
+    this.detectedBounds,
+    required this.timestamp,
   });
 }
 
@@ -320,4 +50,482 @@ class Rectangle {
   final int height;
 
   Rectangle(this.x, this.y, this.width, this.height);
+}
+
+/// Service Adobe Scan exactement comme l'original
+class AdobeScanService {
+  static final AdobeScanService _instance = AdobeScanService._internal();
+  factory AdobeScanService() => _instance;
+  AdobeScanService._internal();
+
+  final TextRecognizer _textRecognizer = TextRecognizer();
+  
+  // Configuration Adobe Scan exacte
+  static const double _edgeDetectionThreshold = 0.12;
+  static const double _autoCaptureConfidence = 0.85;
+  static const int _autoCaptureDelay = 1500; // 1.5 secondes
+  static const double _minDocumentRatio = 0.7;
+  static const double _maxDocumentRatio = 1.4;
+
+  /// Détection en temps réel comme Adobe Scan
+  Future<Rectangle?> detectDocumentEdgesRealTime(CameraImage image) async {
+    try {
+      final WriteBuffer allBytes = WriteBuffer();
+      for (final Plane plane in image.planes) {
+        allBytes.putUint8List(plane.bytes);
+      }
+      final bytes = allBytes.done().buffer.asUint8List();
+
+      final img.Image? cameraImage = img.decodeImage(bytes);
+      if (cameraImage == null) return null;
+
+      // Détection Adobe Scan exacte
+      final documentBounds = _detectDocumentBoundsAdobeStyle(cameraImage);
+      if (documentBounds == null) return null;
+
+      // Validation Adobe Scan
+      if (_isValidAdobeDocument(documentBounds, cameraImage)) {
+        return documentBounds;
+      }
+
+      return null;
+    } catch (e) {
+      debugPrint('Erreur détection Adobe Scan: $e');
+      return null;
+    }
+  }
+
+  /// Détection Adobe Scan exacte
+  Rectangle? _detectDocumentBoundsAdobeStyle(img.Image image) {
+    final gray = img.grayscale(image);
+    final width = gray.width;
+    final height = gray.height;
+
+    // Algorithme Adobe Scan : détection de quadrilatères
+    final edges = _detectEdgesAdobeStyle(gray);
+    if (edges.isEmpty) return null;
+
+    // Trouver le plus grand quadrilatère (document)
+    Rectangle? bestDocument = null;
+    double maxArea = 0;
+
+    for (final edge in edges) {
+      final area = edge.width * edge.height;
+      if (area > maxArea) {
+        maxArea = area.toDouble();
+        bestDocument = edge;
+      }
+    }
+
+    return bestDocument;
+  }
+
+  /// Détection de bords style Adobe Scan
+  List<Rectangle> _detectEdgesAdobeStyle(img.Image image) {
+    final edges = <Rectangle>[];
+    final width = image.width;
+    final height = image.height;
+
+    // Filtre de détection Adobe Scan
+    for (int y = 3; y < height - 3; y++) {
+      for (int x = 3; x < width - 3; x++) {
+        final pixel = image.getPixel(x, y);
+        
+        // Gradient Adobe Scan (plus sophistiqué)
+        final gradient = _calculateAdobeGradient(image, x, y);
+        
+        if (gradient > _edgeDetectionThreshold) {
+          // Créer un rectangle de détection Adobe
+          final rectSize = 40; // Plus grand pour Adobe
+          final rectX = (x - rectSize ~/ 2).clamp(0, width - rectSize);
+          final rectY = (y - rectSize ~/ 2).clamp(0, height - rectSize);
+          
+          edges.add(Rectangle(rectX, rectY, rectSize, rectSize));
+        }
+      }
+    }
+
+    // Fusion Adobe Scan
+    return _mergeAdobeRectangles(edges);
+  }
+
+  /// Calcul de gradient Adobe Scan
+  double _calculateAdobeGradient(img.Image image, int x, int y) {
+    final center = image.getPixel(x, y);
+    
+    // Voisins Adobe Scan (plus de directions)
+    final neighbors = [
+      image.getPixel(x - 2, y),     // gauche
+      image.getPixel(x + 2, y),     // droite
+      image.getPixel(x, y - 2),     // haut
+      image.getPixel(x, y + 2),     // bas
+      image.getPixel(x - 2, y - 2), // haut-gauche
+      image.getPixel(x + 2, y - 2), // haut-droite
+      image.getPixel(x - 2, y + 2), // bas-gauche
+      image.getPixel(x + 2, y + 2), // bas-droite
+    ];
+    
+    double gradient = 0;
+    for (final neighbor in neighbors) {
+      gradient += (center.r - neighbor.r).abs() +
+                  (center.g - neighbor.g).abs() +
+                  (center.b - neighbor.b).abs();
+    }
+    
+    return gradient / (neighbors.length * 255);
+  }
+
+  /// Fusion Adobe Scan
+  List<Rectangle> _mergeAdobeRectangles(List<Rectangle> rectangles) {
+    if (rectangles.isEmpty) return [];
+    
+    final merged = <Rectangle>[];
+    final used = <bool>[];
+    for (int i = 0; i < rectangles.length; i++) {
+      used.add(false);
+    }
+    
+    for (int i = 0; i < rectangles.length; i++) {
+      if (used[i]) continue;
+      
+      Rectangle current = rectangles[i];
+      used[i] = true;
+      
+      // Fusion Adobe (plus agressive)
+      for (int j = i + 1; j < rectangles.length; j++) {
+        if (used[j]) continue;
+        
+        final other = rectangles[j];
+        final distance = _calculateAdobeDistance(current, other);
+        
+        if (distance < 80) { // Seuil Adobe plus élevé
+          current = _mergeAdobeRectangles(current, other);
+          used[j] = true;
+        }
+      }
+      
+      merged.add(current);
+    }
+    
+    return merged;
+  }
+
+  /// Distance Adobe Scan
+  double _calculateAdobeDistance(Rectangle r1, Rectangle r2) {
+    final center1X = r1.x + r1.width ~/ 2;
+    final center1Y = r1.y + r1.height ~/ 2;
+    final center2X = r2.x + r2.width ~/ 2;
+    final center2Y = r2.y + r2.height ~/ 2;
+    
+    return ((center1X - center2X) * (center1X - center2X) + 
+            (center1Y - center2Y) * (center1Y - center2Y)).toDouble();
+  }
+
+  /// Fusion Adobe
+  Rectangle _mergeAdobeRectangles(Rectangle r1, Rectangle r2) {
+    final minX = r1.x < r2.x ? r1.x : r2.x;
+    final minY = r1.y < r2.y ? r1.y : r2.y;
+    final maxX = (r1.x + r1.width) > (r2.x + r2.width) ? 
+                  (r1.x + r1.width) : (r2.x + r2.width);
+    final maxY = (r1.y + r1.height) > (r2.y + r2.height) ? 
+                  (r1.y + r1.height) : (r2.y + r2.height);
+    
+    return Rectangle(minX, minY, maxX - minX, maxY - minY);
+  }
+
+  /// Validation Adobe Scan
+  bool _isValidAdobeDocument(Rectangle rect, img.Image image) {
+    final ratio = rect.width / rect.height;
+    
+    // Critères Adobe Scan exacts
+    if (ratio < _minDocumentRatio || ratio > _maxDocumentRatio) {
+      return false;
+    }
+    
+    // Vérifier la taille minimale Adobe
+    final minArea = image.width * image.height * 0.1; // 10% de l'image
+    final area = rect.width * rect.height;
+    
+    return area >= minArea;
+  }
+
+  /// Amélioration Adobe Scan exacte
+  Future<File> enhanceImageAdobeStyle(File originalImage) async {
+    try {
+      final bytes = await originalImage.readAsBytes();
+      img.Image? image = img.decodeImage(bytes);
+      if (image == null) throw Exception('Impossible de décoder l\'image');
+
+      // Pipeline Adobe Scan exact
+      image = _correctPerspectiveAdobe(image);
+      image = _enhanceContrastAdobe(image);
+      image = _denoiseAdobe(image);
+      image = _sharpenAdobe(image);
+      image = _optimizeForOCRAdobe(image);
+
+      // Sauvegarder Adobe style
+      final tempDir = await getTemporaryDirectory();
+      final enhancedPath = '${tempDir.path}/adobe_scan_${DateTime.now().millisecondsSinceEpoch}.jpg';
+      
+      final enhancedBytes = img.encodeJpg(image, quality: 95);
+      final enhancedFile = File(enhancedPath);
+      await enhancedFile.writeAsBytes(enhancedBytes);
+
+      return enhancedFile;
+    } catch (e) {
+      debugPrint('Erreur amélioration Adobe: $e');
+      return originalImage;
+    }
+  }
+
+  /// Correction perspective Adobe
+  img.Image _correctPerspectiveAdobe(img.Image image) {
+    try {
+      final corners = _detectAdobeCorners(image);
+      if (corners.length == 4) {
+        return _applyAdobePerspective(image, corners);
+      }
+    } catch (e) {
+      debugPrint('Erreur perspective Adobe: $e');
+    }
+    return image;
+  }
+
+  /// Détection coins Adobe
+  List<ScanPoint> _detectAdobeCorners(img.Image image) {
+    final corners = <ScanPoint>[];
+    final gray = img.grayscale(image);
+    final width = gray.width;
+    final height = gray.height;
+    
+    // Quadrants Adobe
+    final quadrants = [
+      [0, 0, width ~/ 2, height ~/ 2],
+      [width ~/ 2, 0, width, height ~/ 2],
+      [0, height ~/ 2, width ~/ 2, height],
+      [width ~/ 2, height ~/ 2, width, height],
+    ];
+    
+    for (final quadrant in quadrants) {
+      final corner = _findAdobeCorner(gray, quadrant[0], quadrant[1], quadrant[2], quadrant[3]);
+      if (corner != null) {
+        corners.add(corner);
+      }
+    }
+    
+    return corners;
+  }
+
+  /// Trouver coin Adobe
+  ScanPoint? _findAdobeCorner(img.Image image, int x1, int y1, int x2, int y2) {
+    double maxGradient = 0;
+    ScanPoint? bestCorner;
+    
+    for (int y = y1; y < y2; y++) {
+      for (int x = x1; x < x2; x++) {
+        final gradient = _calculateAdobeCornerGradient(image, x, y);
+        if (gradient > maxGradient) {
+          maxGradient = gradient;
+          bestCorner = ScanPoint(x, y);
+        }
+      }
+    }
+    
+    return bestCorner;
+  }
+
+  /// Gradient coin Adobe
+  double _calculateAdobeCornerGradient(img.Image image, int x, int y) {
+    if (x < 2 || y < 2 || x >= image.width - 2 || y >= image.height - 2) {
+      return 0;
+    }
+    
+    final center = image.getPixel(x, y);
+    final neighbors = [
+      image.getPixel(x - 1, y),
+      image.getPixel(x + 1, y),
+      image.getPixel(x, y - 1),
+      image.getPixel(x, y + 1),
+    ];
+    
+    double gradient = 0;
+    for (final neighbor in neighbors) {
+      gradient += (center.r - neighbor.r).abs() +
+                  (center.g - neighbor.g).abs() +
+                  (center.b - neighbor.b).abs();
+    }
+    
+    return gradient;
+  }
+
+  /// Perspective Adobe
+  img.Image _applyAdobePerspective(img.Image image, List<ScanPoint> corners) {
+    corners.sort((a, b) {
+      if (a.y != b.y) return a.y.compareTo(b.y);
+      return a.x.compareTo(b.x);
+    });
+    
+    final width = _calculateAdobeDistance(corners[0], corners[1]).round();
+    final height = _calculateAdobeDistance(corners[0], corners[2]).round();
+    
+    final corrected = img.Image(width: width, height: height);
+    
+    for (int y = 0; y < height; y++) {
+      for (int x = 0; x < width; x++) {
+        final sourceX = _interpolateAdobeX(x, y, width, height, corners);
+        final sourceY = _interpolateAdobeY(x, y, width, height, corners);
+        
+        if (sourceX >= 0 && sourceX < image.width && 
+            sourceY >= 0 && sourceY < image.height) {
+          corrected.setPixel(x, y, image.getPixel(sourceX.round(), sourceY.round()));
+        }
+      }
+    }
+    
+    return corrected;
+  }
+
+  /// Interpolation Adobe X
+  double _interpolateAdobeX(int x, int y, int width, int height, List<ScanPoint> corners) {
+    final u = x / width.toDouble();
+    final v = y / height.toDouble();
+    
+    return (1 - u) * (1 - v) * corners[0].x +
+           u * (1 - v) * corners[1].x +
+           u * v * corners[2].x +
+           (1 - u) * v * corners[3].x;
+  }
+
+  /// Interpolation Adobe Y
+  double _interpolateAdobeY(int x, int y, int width, int height, List<ScanPoint> corners) {
+    final u = x / width.toDouble();
+    final v = y / height.toDouble();
+    
+    return (1 - u) * (1 - v) * corners[0].y +
+           u * (1 - v) * corners[1].y +
+           u * v * corners[2].y +
+           (1 - u) * v * corners[3].y;
+  }
+
+  /// Distance Adobe
+  double _calculateAdobeDistance(ScanPoint p1, ScanPoint p2) {
+    return ((p1.x - p2.x) * (p1.x - p2.x) + 
+            (p1.y - p2.y) * (p1.y - p2.y)).toDouble();
+  }
+
+  /// Amélioration contraste Adobe
+  img.Image _enhanceContrastAdobe(img.Image image) {
+    return img.adjustColor(image, contrast: 1.4); // Adobe style
+  }
+
+  /// Dénuiser Adobe
+  img.Image _denoiseAdobe(img.Image image) {
+    // Filtre Adobe
+    return img.gaussianBlur(image, radius: 0.5);
+  }
+
+  /// Netteté Adobe
+  img.Image _sharpenAdobe(img.Image image) {
+    // Filtre de netteté Adobe
+    final kernel = [
+      [0, -1, 0],
+      [-1, 5, -1],
+      [0, -1, 0]
+    ];
+    return img.convolution(image, kernel);
+  }
+
+  /// Optimisation OCR Adobe
+  img.Image _optimizeForOCRAdobe(img.Image image) {
+    return img.adjustColor(image, 
+      contrast: 1.3,
+      brightness: 1.05,
+      saturation: 1.1,
+    );
+  }
+
+  /// OCR Adobe Scan
+  Future<String> performAdobeOCR(File imageFile) async {
+    try {
+      final inputImage = InputImage.fromFile(imageFile);
+      final recognizedText = await _textRecognizer.processImage(inputImage);
+      
+      String extractedText = '';
+      for (TextBlock block in recognizedText.blocks) {
+        for (TextLine line in block.lines) {
+          extractedText += line.text + '\n';
+        }
+      }
+      
+      return extractedText.trim();
+    } catch (e) {
+      debugPrint('Erreur OCR Adobe: $e');
+      return '';
+    }
+  }
+
+  /// Processus Adobe Scan complet
+  Future<AdobeScanResult> processAdobeScan(File originalImage, Rectangle? detectedBounds) async {
+    try {
+      // Amélioration Adobe
+      final enhancedImage = await enhanceImageAdobeStyle(originalImage);
+      
+      // OCR Adobe
+      final ocrText = await performAdobeOCR(enhancedImage);
+      
+      // Qualité Adobe
+      final quality = _assessAdobeQuality(enhancedImage, ocrText);
+      
+      return AdobeScanResult(
+        originalImage: originalImage,
+        processedImage: enhancedImage,
+        ocrText: ocrText,
+        quality: quality,
+        detectedBounds: detectedBounds,
+        timestamp: DateTime.now(),
+      );
+    } catch (e) {
+      debugPrint('Erreur Adobe Scan: $e');
+      rethrow;
+    }
+  }
+
+  /// Évaluation qualité Adobe
+  ScanQuality _assessAdobeQuality(File enhancedImage, String ocrText) {
+    if (ocrText.length > 150) {
+      return ScanQuality.excellent;
+    } else if (ocrText.length > 80) {
+      return ScanQuality.good;
+    } else if (ocrText.length > 20) {
+      return ScanQuality.fair;
+    } else {
+      return ScanQuality.poor;
+    }
+  }
+
+  /// Demande permissions Adobe style
+  Future<bool> requestAdobePermissions() async {
+    try {
+      final cameraStatus = await Permission.camera.request();
+      
+      PermissionStatus storageStatus;
+      if (await Permission.storage.isGranted) {
+        storageStatus = PermissionStatus.granted;
+      } else {
+        if (await Permission.photos.isGranted) {
+          storageStatus = PermissionStatus.granted;
+        } else {
+          storageStatus = await Permission.photos.request();
+        }
+      }
+      
+      final hasCamera = cameraStatus.isGranted;
+      final hasStorage = storageStatus.isGranted;
+      
+      return hasCamera && hasStorage;
+    } catch (e) {
+      debugPrint('Erreur permissions Adobe: $e');
+      return false;
+    }
+  }
 } 

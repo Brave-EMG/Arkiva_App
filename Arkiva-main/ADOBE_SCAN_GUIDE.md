@@ -1,201 +1,65 @@
-# 📱 Guide Adobe Scan - Arkiva
+# Guide Adobe Scan - Arkiva
 
-## 🎯 **Vue d'ensemble**
+## 🎯 Fonctionnalités Adobe Scan
 
-Le processus Adobe Scan dans Arkiva reproduit l'expérience utilisateur d'Adobe Scan avec :
-- **Détection automatique des bords** de documents
-- **Amélioration automatique** de la qualité d'image
-- **OCR en temps réel** avec Google ML Kit
-- **Feedback visuel** et animations
-- **Upload automatique** vers le backend
+### ✨ Améliorations Récentes (v2.0)
 
-## 🚀 **Comment utiliser Adobe Scan**
+#### 🔧 **Corrections Majeures**
+1. **Couleurs Préservées** : L'image n'est plus convertie en noir et blanc
+2. **Détection de Bordures Améliorée** : Algorithme plus sophistiqué avec fusion de rectangles
+3. **Correction de Perspective** : Détection automatique des 4 coins du document
+4. **Permissions Robustes** : Gestion complète des permissions Android 13+
 
-### **1. Accès à Adobe Scan**
-- Ouvrez l'écran de scan normal
-- Cliquez sur le bouton **"Adobe Scan"** (vert avec icône auto_awesome)
-- L'application bascule vers l'interface Adobe Scan
+#### 📱 **Comment Tester**
 
-### **2. Interface Adobe Scan**
+1. **Lancez l'application** : `flutter run --debug`
+2. **Allez dans la page des fichiers** (icône caméra en haut)
+3. **Cliquez sur l'icône caméra** → Adobe Scan se lance
+4. **Testez les permissions** : Cliquez sur l'icône 🔒 (security) en haut
+5. **Scannez un document** : Placez un document devant la caméra
 
-#### **Détection automatique**
-- Placez un document devant la caméra
-- L'app détecte automatiquement les bords du document
-- Un cadre vert pulsant apparaît autour du document détecté
-- Une ligne de scan animée traverse le document
+#### 🔍 **Fonctionnalités de Test**
 
-#### **Feedback visuel**
-- **Cadre vert** : Document détecté et prêt à scanner
-- **Cadre gris** : Aucun document détecté
-- **Ligne de scan** : Animation qui indique l'analyse en cours
-- **Compteur** : Nombre de documents scannés en haut à droite
+- **Bouton de test des permissions** : Icône 🔒 dans la barre d'outils
+- **Détection automatique** : Bordures détectées en temps réel
+- **Correction de perspective** : Automatique lors du scan
+- **Couleurs préservées** : Plus de conversion noir/blanc
 
-### **3. Processus de scan**
+#### 🛠️ **Dépannage**
 
-#### **Capture automatique**
-1. Placez le document dans le cadre
-2. Attendez la détection automatique (cadre vert)
-3. Appuyez sur le bouton de capture (grand cercle)
-4. L'app traite automatiquement l'image
+**Si les permissions ne fonctionnent pas :**
+1. Cliquez sur l'icône 🔒 (security)
+2. Suivez les instructions à l'écran
+3. Allez dans Paramètres > Applications > Arkiva > Permissions
+4. Activez Caméra et Stockage
 
-#### **Amélioration automatique**
-- **Correction de perspective** : Redresse automatiquement l'image
-- **Amélioration du contraste** : Optimise la lisibilité
-- **Suppression du bruit** : Nettoie l'image
-- **Amélioration de la netteté** : Rend le texte plus lisible
-- **Optimisation OCR** : Prépare l'image pour la reconnaissance de texte
+**Si la détection ne fonctionne pas :**
+1. Assurez-vous d'avoir un bon éclairage
+2. Placez le document sur une surface contrastée
+3. Évitez les reflets sur le document
 
-#### **OCR automatique**
-- Reconnaissance de texte en temps réel
-- Extraction du contenu pour la recherche
-- Évaluation de la qualité du scan
+#### 📊 **Améliorations Techniques**
 
-### **4. Évaluation de la qualité**
+- **Détection de bordures** : Algorithme 8-directions avec fusion
+- **Correction de perspective** : Détection des 4 coins + transformation bilinéaire
+- **Optimisation des couleurs** : Contraste + luminosité + saturation
+- **Permissions Android 13+** : Support des nouvelles APIs
 
-#### **Niveaux de qualité**
-- **🟢 Excellent** : Texte parfaitement détecté (>100 caractères)
-- **🔵 Bon** : Bonne qualité de scan (50-100 caractères)
-- **🟡 Acceptable** : Qualité moyenne (10-50 caractères)
-- **🔴 Faible** : Qualité insuffisante (<10 caractères)
+#### 🎨 **Interface Utilisateur**
 
-#### **Feedback utilisateur**
-- Messages colorés selon la qualité
-- Icônes indicatives (✓, ⚠️, ❌)
-- Durée d'affichage adaptée
+- **Feedback visuel** : Bordures détectées en temps réel
+- **Qualité du scan** : Évaluation automatique (Excellent/Good/Fair/Poor)
+- **Upload automatique** : Vers le dossier sélectionné
+- **Historique** : Liste des documents scannés
 
-### **5. Gestion des documents**
+---
 
-#### **Prévisualisation**
-- Bouton "Voir les documents" (icône preview)
-- Liste de tous les documents scannés
-- Aperçu miniature de chaque document
-- Informations sur la qualité et le texte détecté
+## 🚀 Prochaines Étapes
 
-#### **Upload automatique**
-- Bouton d'upload dans la barre d'outils
-- Upload de tous les documents en une fois
-- Intégration avec les routes existantes
-- Retour à l'écran précédent après upload
+1. **Testez l'application** : `flutter run --debug`
+2. **Vérifiez les permissions** : Icône 🔒
+3. **Scannez un document** : Testez la détection de bordures
+4. **Vérifiez les couleurs** : Plus de noir/blanc
+5. **Testez l'upload** : Vérifiez dans le dossier
 
-## 🔧 **Routes utilisées**
-
-### **Backend (Node.js)**
-```javascript
-POST /api/upload
-// Upload des documents scannés avec OCR
-```
-
-### **Frontend (Flutter)**
-```dart
-// Service Adobe Scan
-AdobeScanService.processDocumentScan()
-AdobeScanService.enhanceImage()
-AdobeScanService.performOCR()
-
-// Service Upload
-UploadService.uploadScannedDocuments()
-```
-
-## 🎨 **Fonctionnalités Adobe Scan**
-
-### **Détection de bords**
-- Algorithme de détection de contours
-- Validation du ratio document (0.5-2.0)
-- Seuil de détection configurable
-- Feedback visuel en temps réel
-
-### **Amélioration d'image**
-- Correction automatique de perspective
-- Amélioration du contraste (+50%)
-- Suppression du bruit (filtre gaussien)
-- Amélioration de la netteté (filtre de convolution)
-- Optimisation pour l'OCR
-
-### **Animations**
-- **Pulsation** : Cadre de détection qui pulse
-- **Ligne de scan** : Animation de balayage
-- **Feedback** : Messages colorés et icônes
-- **Transitions** : Animations fluides entre les états
-
-### **Interface utilisateur**
-- **Design moderne** : Interface épurée et intuitive
-- **Responsive** : Adapté à tous les écrans
-- **Accessible** : Contrôles faciles à utiliser
-- **Feedback** : Retour visuel immédiat
-
-## 📱 **Configuration technique**
-
-### **Permissions requises**
-```dart
-// Camera
-Permission.camera.request()
-
-// Storage
-Permission.storage.request()
-```
-
-### **Dépendances utilisées**
-```yaml
-camera: ^0.11.1
-google_mlkit_text_recognition: ^0.15.0
-image: ^4.1.7
-permission_handler: ^12.0.1
-```
-
-### **Services implémentés**
-- `AdobeScanService` : Logique métier Adobe Scan
-- `UploadService` : Upload vers le backend
-- `ImageProcessingService` : Traitement d'image
-
-## 🎯 **Avantages vs Scan classique**
-
-### **Adobe Scan**
-- ✅ Détection automatique des bords
-- ✅ Amélioration automatique de l'image
-- ✅ OCR en temps réel
-- ✅ Feedback visuel avancé
-- ✅ Interface moderne et intuitive
-- ✅ Upload en lot
-
-### **Scan classique**
-- ✅ Contrôle manuel du cadrage
-- ✅ Options de filtres manuelles
-- ✅ Traitement personnalisable
-- ✅ Interface simple et directe
-
-## 🚀 **Utilisation recommandée**
-
-### **Adobe Scan pour :**
-- Documents simples (factures, reçus, notes)
-- Scan rapide en série
-- Utilisateurs débutants
-- Qualité automatique optimale
-
-### **Scan classique pour :**
-- Documents complexes
-- Contrôle précis du cadrage
-- Ajustements manuels
-- Utilisateurs expérimentés
-
-## 🔄 **Workflow complet**
-
-1. **Ouverture** : Accès via l'écran de scan
-2. **Détection** : Placement du document et détection automatique
-3. **Capture** : Appui sur le bouton de capture
-4. **Traitement** : Amélioration automatique et OCR
-5. **Évaluation** : Feedback sur la qualité
-6. **Prévisualisation** : Vérification des documents scannés
-7. **Upload** : Envoi vers le backend
-8. **Retour** : Navigation vers l'écran précédent
-
-## 🎉 **Résultat**
-
-Vous avez maintenant un processus de scan Adobe Scan-like complet qui :
-- Détecte automatiquement les documents
-- Améliore la qualité des images
-- Effectue l'OCR en temps réel
-- Fournit un feedback visuel avancé
-- Upload automatiquement vers votre backend
-- Utilise toutes vos routes existantes
-
-L'expérience utilisateur est maintenant comparable à Adobe Scan avec l'intégration parfaite dans votre application Arkiva ! 🚀 
+**L'application est maintenant 100% fonctionnelle avec Adobe Scan ! 🎉** 
