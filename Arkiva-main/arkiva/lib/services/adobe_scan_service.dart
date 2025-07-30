@@ -97,16 +97,16 @@ class AdobeScanService {
 
   /// Détection Adobe Scan exacte
   Rectangle? _detectDocumentBoundsAdobeStyle(img.Image image) {
-    final gray = img.grayscale(image);
-    final width = gray.width;
-    final height = gray.height;
+    // Garder les couleurs originales pour la détection
+    final width = image.width;
+    final height = image.height;
 
     // Algorithme Adobe Scan : détection de quadrilatères
-    final edges = _detectEdgesAdobeStyle(gray);
+    final edges = _detectEdgesAdobeStyle(image);
     if (edges.isEmpty) return null;
 
     // Trouver le plus grand quadrilatère (document)
-    Rectangle? bestDocument = null;
+    Rectangle? bestDocument;
     double maxArea = 0;
 
     for (final edge in edges) {
@@ -129,9 +129,7 @@ class AdobeScanService {
     // Filtre de détection Adobe Scan
     for (int y = 3; y < height - 3; y++) {
       for (int x = 3; x < width - 3; x++) {
-        final pixel = image.getPixel(x, y);
-        
-        // Gradient Adobe Scan (plus sophistiqué)
+        // Calcul du gradient Adobe Scan (plus sophistiqué)
         final gradient = _calculateAdobeGradient(image, x, y);
         
         if (gradient > _edgeDetectionThreshold) {
@@ -196,10 +194,10 @@ class AdobeScanService {
         if (used[j]) continue;
         
         final other = rectangles[j];
-        final distance = _calculateAdobeDistance(current, other);
+        final distance = _calculateAdobeRectangleDistance(current, other);
         
         if (distance < 80) { // Seuil Adobe plus élevé
-          current = _mergeAdobeRectangles(current, other);
+          current = _mergeTwoAdobeRectangles(current, other);
           used[j] = true;
         }
       }
@@ -210,8 +208,8 @@ class AdobeScanService {
     return merged;
   }
 
-  /// Distance Adobe Scan
-  double _calculateAdobeDistance(Rectangle r1, Rectangle r2) {
+  /// Distance Adobe Scan entre rectangles
+  double _calculateAdobeRectangleDistance(Rectangle r1, Rectangle r2) {
     final center1X = r1.x + r1.width ~/ 2;
     final center1Y = r1.y + r1.height ~/ 2;
     final center2X = r2.x + r2.width ~/ 2;
@@ -221,8 +219,8 @@ class AdobeScanService {
             (center1Y - center2Y) * (center1Y - center2Y)).toDouble();
   }
 
-  /// Fusion Adobe
-  Rectangle _mergeAdobeRectangles(Rectangle r1, Rectangle r2) {
+  /// Fusion Adobe de deux rectangles
+  Rectangle _mergeTwoAdobeRectangles(Rectangle r1, Rectangle r2) {
     final minX = r1.x < r2.x ? r1.x : r2.x;
     final minY = r1.y < r2.y ? r1.y : r2.y;
     final maxX = (r1.x + r1.width) > (r2.x + r2.width) ? 
@@ -359,15 +357,15 @@ class AdobeScanService {
     return gradient;
   }
 
-  /// Perspective Adobe (garde les couleurs)
+  /// Perspective Adobe
   img.Image _applyAdobePerspective(img.Image image, List<ScanPoint> corners) {
     corners.sort((a, b) {
       if (a.y != b.y) return a.y.compareTo(b.y);
       return a.x.compareTo(b.x);
     });
     
-    final width = _calculateAdobeDistance(corners[0], corners[1]).round();
-    final height = _calculateAdobeDistance(corners[0], corners[2]).round();
+    final width = _calculateAdobePointDistance(corners[0], corners[1]).round();
+    final height = _calculateAdobePointDistance(corners[0], corners[2]).round();
     
     final corrected = img.Image(width: width, height: height);
     
@@ -409,13 +407,13 @@ class AdobeScanService {
            (1 - u) * v * corners[3].y;
   }
 
-  /// Distance Adobe
-  double _calculateAdobeDistance(ScanPoint p1, ScanPoint p2) {
+  /// Distance Adobe entre points
+  double _calculateAdobePointDistance(ScanPoint p1, ScanPoint p2) {
     return ((p1.x - p2.x) * (p1.x - p2.x) + 
             (p1.y - p2.y) * (p1.y - p2.y)).toDouble();
   }
 
-  /// Amélioration contraste Adobe (garde les couleurs)
+  /// Amélioration contraste Adobe
   img.Image _enhanceContrastAdobe(img.Image image) {
     // Améliorer le contraste sans perdre les couleurs
     return img.adjustColor(image, 
@@ -425,24 +423,19 @@ class AdobeScanService {
     );
   }
 
-  /// Dénuiser Adobe (garde les couleurs)
+  /// Dénuiser Adobe
   img.Image _denoiseAdobe(img.Image image) {
-    // Filtre de réduction de bruit léger qui préserve les couleurs
-    return img.gaussianBlur(image, radius: 0.3);
+    // Pour l'instant, retourner l'image sans modification
+    return image;
   }
 
-  /// Netteté Adobe (garde les couleurs)
+  /// Netteté Adobe
   img.Image _sharpenAdobe(img.Image image) {
-    // Filtre de netteté qui préserve les couleurs
-    final kernel = [
-      [0, -0.5, 0],
-      [-0.5, 3, -0.5],
-      [0, -0.5, 0]
-    ];
-    return img.convolution(image, kernel);
+    // Pour l'instant, retourner l'image sans modification
+    return image;
   }
 
-  /// Optimisation OCR Adobe (garde les couleurs)
+  /// Optimisation OCR Adobe
   img.Image _optimizeForOCRAdobe(img.Image image) {
     // Optimisation pour l'OCR tout en gardant les couleurs
     return img.adjustColor(image, 

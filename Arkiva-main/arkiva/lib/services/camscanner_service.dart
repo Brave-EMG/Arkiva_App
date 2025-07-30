@@ -128,8 +128,6 @@ class CamScannerService {
     // Algorithme de détection de bords CamScanner
     for (int y = 5; y < height - 5; y++) {
       for (int x = 5; x < width - 5; x++) {
-        final pixel = image.getPixel(x, y);
-        
         // Calcul du gradient CamScanner
         final gradient = _calculateGradient(image, x, y);
         
@@ -323,17 +321,14 @@ class CamScannerService {
 
   /// Réduction de bruit
   img.Image _reduceNoise(img.Image image) {
-    return img.gaussianBlur(image, radius: 0.5);
+    // Pour l'instant, retourner l'image sans modification
+    return image;
   }
 
   /// Amélioration de la netteté du texte
   img.Image _sharpenText(img.Image image) {
-    final kernel = [
-      [0, -1, 0],
-      [-1, 5, -1],
-      [0, -1, 0]
-    ];
-    return img.convolution(image, kernel);
+    // Pour l'instant, retourner l'image sans modification
+    return image;
   }
 
   /// Optimisation pour OCR
