@@ -1,10 +1,6 @@
-KAWERU GROUP@DESKTOP-FVKBJHC MINGW64 ~/test/Arkiva_App/Arkiva-main/arkiva (chabi)
-$ flutter run 
-Launching lib\main.dart on TECNO KM4 in debug mode...
-lib/services/image_processing_mobile.dart:361:27: Error: Too many positional arguments: 1 allowed, but 2 found.
-Try removing the extra positional arguments.
-    return img.convolution(image, kernel);
-                          ^
+lib/services/image_processing_mobile.dart:361:35: Error: No named parameter with the name 'kernel'.
+    return img.convolution(image, kernel: kernel);
+                                  ^^^^^^
 ../../../../AppData/Local/Pub/Cache/hosted/pub.dev/image-4.5.4/lib/src/filter/convolution.dart:12:7: Context: Found this candidate, but the arguments don't match.
 Image convolution(Image src,
       ^^^^^^^^^^^
@@ -23,9 +19,6 @@ Execution failed for task ':app:compileFlutterBuildDebug'.
 > Run with --scan to get full insights.
 > Get more help at https://help.gradle.org.
 
-BUILD FAILED in 11s
-Running Gradle task 'assembleDebug'...                             12,4s
+BUILD FAILED in 33s
+Running Gradle task 'assembleDebug'...                             33,9s
 Error: Gradle task assembleDebug failed with exit code 1
-
-KAWERU GROUP@DESKTOP-FVKBJHC MINGW64 ~/test/Arkiva_App/Arkiva-main/arkiva (chabi)
-$
