@@ -1,10 +1,6 @@
-E/flutter ( 4857): [ERROR:flutter/runtime/dart_vm_initializer.cc(40)] Unhandled Exception: ClientException: Broken pipe, uri=http://localhost:3000/api/auth/login
-E/flutter ( 4857): #0      IOClient.send (package:http/src/io_client.dart:156:7)
-E/flutter ( 4857): <asynchronous suspension>
-E/flutter ( 4857): #1      BaseClient._sendUnstreamed (package:http/src/base_client.dart:93:32)
-E/flutter ( 4857): <asynchronous suspension>
-E/flutter ( 4857): #2      _withClient (package:http/http.dart:167:12)
-E/flutter ( 4857): <asynchronous suspension>
-E/flutter ( 4857): #3      _LoginScreenState._login (package:arkiva/screens/login_screen.dart:40:22)
-E/flutter ( 4857): <asynchronous suspension>
-E/flutter ( 4857):
+lib/screens/home_screen.dart:1124:112: Error: Required named parameter 'dossier' must be provided.
+                    () => Navigator.push(context, MaterialPageRoute(builder: (context) => const AdobeScanScreen()))
+                                                                                                               ^
+lib/screens/adobe_scan_screen.dart:14:9: Context: Found this candidate, but the arguments don't match.
+  const AdobeScanScreen({
+        ^^^^^^^^^^^^^^^
