@@ -260,7 +260,7 @@ class _AdobeScanScreenState extends State<AdobeScanScreen> with TickerProviderSt
         await _uploadService.uploadScannedDocuments(
           token: token,
           files: [scanResult.enhancedImage],
-          dossierId: widget.dossier?.dossierId,
+          dossierId: widget.dossier?.dossierId ?? 0,
           entrepriseId: entrepriseId,
         );
       }

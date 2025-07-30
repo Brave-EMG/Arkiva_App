@@ -59,7 +59,7 @@ class UploadService {
   Future<void> uploadScannedDocuments({
     required String token,
     required List<File> files,
-    required int dossierId,
+    int? dossierId,
     required int entrepriseId,
   }) async {
     try {
@@ -76,7 +76,9 @@ class UploadService {
       request.headers['Authorization'] = 'Bearer $token';
 
       // Ajouter les champs
-      request.fields['dossier_id'] = dossierId.toString();
+      if (dossierId != null) {
+        request.fields['dossier_id'] = dossierId.toString();
+      }
       request.fields['entreprise_id'] = entrepriseId.toString();
 
       // Ajouter les fichiers
