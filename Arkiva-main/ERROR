@@ -1,29 +1,398 @@
-lib/screens/adobe_scan_screen.dart:263:29: Error: The argument type 'int?' can't be assigned to the parameter type 'int' because 'int?' is nullable and 'int' isn't.
-          dossierId: widget.dossier?.dossierId,
-                            ^
-I/flutter (14578): Nombre de casiers à afficher : 2
-I/flutter (14578): Casier: 1 - C1
-I/flutter (14578): Casier: 2 - C2
-I/flutter (14578): Nombre de casiers à afficher : 2
-I/flutter (14578): Casier: 1 - C1
-I/flutter (14578): Casier: 2 - C2
-Target kernel_snapshot_program failed: Exception
+ Built build\app\outputs\flutter-apk\app-debug.apk
+Installing build\app\outputs\flutter-apk\app-debug.apk...          53,1s
+I/flutter (23128): [IMPORTANT:flutter/shell/platform/android/android_context_vk_impeller.cc(61)] Using the Impeller rendering backend (Vulkan).
+D/FdLeakLice(23128): FdLeakCheck app is not systemapp!!!
+Syncing files to device TECNO KM4...                               588ms
+
+Flutter run key commands.
+r Hot reload. 
+R Hot restart.
+h List all available interactive commands.
+d Detach (terminate "flutter run" but leave application running).
+c Clear the screen
+q Quit (terminate the application on the device).
+
+A Dart VM Service on TECNO KM4 is available at: http://127.0.0.1:57733/MokQydrsmJc=/
+The Flutter DevTools debugger and profiler on TECNO KM4 is available at: http://127.0.0.1:9101?uri=http://127.0.0.1:57733/MokQydrsmJc=/
+I/.example.arkiva(23128): hook_module_init libgui_unisoc_utils.so over, map size:3, library handle:0xf622f8dd5e22555b
+I/UnisocBufferQueueHelper(23128): Unisoc-Graphics: UnisocBufferQueueHelper create, this:0xb4000079f0860920, size:88
+I/.example.arkiva(23128): createUnisocBufferQueueHelperFactory success, get instance 0xb4000079f0860920
+I/.example.arkiva(23128): Unisoc-Graphics: UnisocFrameRecord create, this:0xb4000079f0e78f00, size:296, enable:0
+I/.example.arkiva(23128): createUnisocFrameRecordFactory success, get instance 0xb4000079f0e78f00
+I/.example.arkiva(23128): Compiler allocated 5183KB to compile void android.view.ViewRootImpl.performTraversals()
+W/libc    (23128): Access denied finding property "persist.vendor.gpu.fbc"
+I/mali_gralloc(23128): Unisoc: get compress property: persist.vendor.gpu.fbc (1)
+E/mali_gralloc(23128): Requested R8 format is not supported with this allocator. R8 format is only supported with the AIDL allocator
+E/mali_gralloc(23128): ERROR: Unrecognized and/or unsupported format R8 and usage TEXTURE + RENDER + HWC
+E/mali_gralloc(23128): ERROR: Unrecognized and/or unsupported format RGBA_10101010 and usage TEXTURE + RENDER + HWC
+E/mali_gralloc(23128): Requested R8 format is not supported with this allocator. R8 format is only supported with the AIDL allocator
+E/mali_gralloc(23128): ERROR: Unrecognized and/or unsupported format R8 and usage TEXTURE + RENDER + HWC
+E/mali_gralloc(23128): ERROR: Unrecognized and/or unsupported format RGBA_10101010 and usage TEXTURE + RENDER + HWC
+D/mali_gralloc(23128): register: id=3280003fe80, handle=0xb4000079f0e67340, importpid=23128
+W/libc    (23128): Access denied finding property "persist.vendor.gpu.ionmemtrack"
+I/mali_gralloc(23128): initIonKernelMemtrack open devices:/dev/systemheap success, fd:226
+D/mali_gralloc(23128): register: id=3280003fe80, handle=0xb4000079f0e676c0, importpid=23128
+D/mali_gralloc(23128): unregister: id=3280003fe80, handle=0xb4000079f0e676c0, base=0x0, importpid=23128, clone_count=1
+D/mali_gralloc(23128): register: id=3280003fe81, handle=0xb4000079f0e676c0, importpid=23128
+D/mali_gralloc(23128): register: id=3280003fe81, handle=0xb4000079f0e677a0, importpid=23128
+D/mali_gralloc(23128): unregister: id=3280003fe81, handle=0xb4000079f0e677a0, base=0x0, importpid=23128, clone_count=1
+D/mali_gralloc(23128): register: id=3280003fe82, handle=0xb4000079f0e677a0, importpid=23128
+D/mali_gralloc(23128): register: id=3280003fe82, handle=0xb4000079f0e67880, importpid=23128
+D/mali_gralloc(23128): unregister: id=3280003fe82, handle=0xb4000079f0e67880, base=0x0, importpid=23128, clone_count=1
+D/mali_gralloc(23128): register: id=3280003fe83, handle=0xb4000079f0e67880, importpid=23128
+D/mali_gralloc(23128): register: id=3280003fe83, handle=0xb4000079f0e67960, importpid=23128
+D/mali_gralloc(23128): unregister: id=3280003fe83, handle=0xb4000079f0e67960, base=0x0, importpid=23128, clone_count=1
+D/mali_gralloc(23128): register: id=3280003fe84, handle=0xb4000079f0e67960, importpid=23128
+D/mali_gralloc(23128): register: id=3280003fe84, handle=0xb4000079f0e67a40, importpid=23128
+D/mali_gralloc(23128): unregister: id=3280003fe84, handle=0xb4000079f0e67a40, base=0x0, importpid=23128, clone_count=1
+I/.example.arkiva(23128): Compiler allocated 5359KB to compile void android.view.ViewRootImpl.performTraversals()
+W/Choreographer(23128): Already have a pending vsync event.  There should only be one at a time.
+D/LogUtil (23128): The value of DEBUG is: false
+D/LogUtil (23128): mLogd_enable
+D/mali_gralloc(23128): register: id=3280003fe85, handle=0xb4000079f0e68220, importpid=23128
+D/ProfileInstaller(23128): Installing profile for com.example.arkiva
+I/flutter (23128): 🔄 Initialisation de l'état d'authentification...
+I/flutter (23128): 🔄 Envoi de la requête pour récupérer les infos utilisateur...
+I/flutter (23128): 🔑 Envoi du token: eyJhbGciOi...
+I/flutter (23128): 📥 Réponse reçue:
+I/flutter (23128):    - Status code: 401
+I/flutter (23128):    - Body: {"message":"Token invalide"}
+I/flutter (23128): ❌ Échec de la récupération des infos utilisateur:
+I/flutter (23128):    - Erreur: {"message":"Token invalide"}
+I/flutter (23128): ❌ Erreur lors de la récupération des infos utilisateur au démarrage: Exception: Échec de la récupération des infos utilisateur: {"messag
+e":"Token invalide"}
+I/flutter (23128): 🔄 Suppression de l'état d'authentification...
+I/flutter (23128): ✅ État d'authentification supprimé
+I/flutter (23128): 📊 État d'authentification:
+I/flutter (23128):    - Authentifié: false
+I/flutter (23128):    - User ID: null
+I/flutter (23128):    - Username: null
+I/flutter (23128):    - Entreprise ID: null
+I/flutter (23128):    - Role: null
+W/WindowOnBackDispatcher(23128): OnBackInvokedCallback is not enabled for the application.
+W/WindowOnBackDispatcher(23128): Set 'android:enableOnBackInvokedCallback="true"' in the application manifest.
+D/os.LiceInfo(23128): instance successfully. com.transsion.message.bank.v1.MessageBankLice@4366406 from com.transsion.message.bank.IMessageBankLice
+D/TextSelection(23128): call hasMessage cause invalidateCache
+D/os.SingleLice(23128): instance successfully. com.transsion.dragdrop.v1.DragDropLice@5c4ba92 from com.transsion.dragdrop.DragDropLiceFactory
+D/os.SingleLiceFactory(23128): instance successfully. com.transsion.dragdrop.v1.DragDropLice@5c4ba92 from android.view.IViewLice
+D/os.LiceInfo(23128): instance successfully. com.transsion.view.ViewLice@4881c63 from android.view.IViewLice
+W/WindowOnBackDispatcher(23128): OnBackInvokedCallback is not enabled for the application.
+W/WindowOnBackDispatcher(23128): Set 'android:enableOnBackInvokedCallback="true"' in the application manifest.
+D/TextSelection(23128): onUseCache cache=false
+I/ImeTracker(23128): com.example.arkiva:a518eb7f: onRequestShow at ORIGIN_CLIENT reason SHOW_SOFT_INPUT fromUser false
+D/TranClassInfo(23128): instance successfully. com.transsion.hubcore.internal.latency.TranLatencyTrackerImpl@8604724 from com.transsion.hubcore.internal.latency.ITranLatencyTracker
+D/InputMethodManager(23128): showSoftInput() view=io.flutter.embedding.android.FlutterView{a41aa89 VFE...... .F....ID 0,0-720,1600 #1 aid=1073741824} flags=0 reason=SHOW_SOFT_INPUT
+W/.example.arkiva(23128): ApkAssets: Deleting an ApkAssets object '<empty> and /data/app/~~jsMQLdHEH0pM0LqhKdn2pQ==/com.google.android.marvin.talkback-zr_vXmv9TXxnBOqH9MYm2w==/base.apk' with 1 weak references
+W/.example.arkiva(23128): ApkAssets: Deleting an ApkAssets object '<empty> and /data/app/~~jsMQLdHEH0pM0LqhKdn2pQ==/com.google.android.marvin.talkback-zr_vXmv9TXxnBOqH9MYm2w==/split_config.arm64_v8a.apk' with 1 weak references
+W/.example.arkiva(23128): ApkAssets: Deleting an ApkAssets object '<empty> and /tr_preload/operator/app/Notepad/Notepad.apk' with 1 weak references        
+W/.example.arkiva(23128): ApkAssets: Deleting an ApkAssets object '<empty> and /tr_preload/operator/app/HiTranslate/HiTranslate.apk' with 1 weak referencesW/.example.arkiva(23128): ApkAssets: Deleting an ApkAssets object '<empty> and /system_ext/app/AiWriting/AiWriting.apk' with 1 weak references
+D/mali_gralloc(23128): register: id=3280003fe86, handle=0xb400007bb24df2a0, importpid=23128
+D/InputConnectionAdaptor(23128): The input method toggled cursor monitoring on
+D/InsetsController(23128): show(ime(), fromIme=true)
+W/InteractionJankMonitor(23128): Initializing without READ_DEVICE_CONFIG permission. enabled=false, interval=1, missedFrameThreshold=3, frameTimeThreshold=64, package=com.example.arkiva
+D/TranClassInfo(23128): instance successfully. com.transsion.hubcore.internal.jank.TranFrameTrackerImpl@5916645 from com.transsion.hubcore.internal.jank.ITranFrameTracker
+D/mali_gralloc(23128): register: id=3280003fe8b, handle=0xb400007c06ddb3c0, importpid=23128
+D/mali_gralloc(23128): register: id=3280003fe8c, handle=0xb400007bb24df1c0, importpid=23128
+I/ImeTracker(23128): com.example.arkiva:a518eb7f: onShown
+D/TextSelection(23128): onUseCache cache=false
+I/ImeTracker(23128): com.example.arkiva:2a3381a7: onRequestShow at ORIGIN_CLIENT reason SHOW_SOFT_INPUT fromUser false
+D/InputMethodManager(23128): showSoftInput() view=io.flutter.embedding.android.FlutterView{a41aa89 VFE...... .F...... 0,0-720,1600 #1 aid=1073741824} flags=0 reason=SHOW_SOFT_INPUT
+D/InputConnectionAdaptor(23128): The input method toggled cursor monitoring on
+D/InputConnectionAdaptor(23128): The input method toggled cursor monitoring off
+D/InputConnectionAdaptor(23128): The input method toggled cursor monitoring on
+D/InsetsController(23128): show(ime(), fromIme=true)
+I/ImeTracker(23128): com.example.arkiva:2a3381a7: onCancelled at PHASE_CLIENT_APPLY_ANIMATION
+D/TextSelection(23128): onUseCache cache=false
+I/ImeTracker(23128): com.example.arkiva:1fb7db3a: onRequestHide at ORIGIN_CLIENT reason HIDE_SOFT_INPUT fromUser false
+D/InputConnectionAdaptor(23128): The input method toggled cursor monitoring off
+D/InsetsController(23128): hide(ime(), fromIme=true)
+I/ImeTracker(23128): com.example.arkiva:3963cf: onRequestHide at ORIGIN_CLIENT reason HIDE_SOFT_INPUT_ON_ANIMATION_STATE_CHANGED fromUser false
+I/ImeTracker(23128): com.example.arkiva:1fb7db3a: onHidden
+D/TextSelection(23128): onUseCache cache=false
+I/flutter (23128): Réponse backend : {"token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImVtYWlsIjoiYWdvbGlhZ2JvZnJpamlkaWFAZ21haWwuY29tIiwiaWF0IjoxNzUzODc1MzY2LCJleHAiOjE3NTM4Nzg5NjZ9.pLkUrSQWjehwZ62rI0YSlWChHgpBeNUvbGdEnnnCLXc","user":{"user_id":1,"entreprise_id":1,"email":"agoliagbofrijidia@gmail.com","password":"$2a$10$1QHWN/ujCDMiG7CgbqUhvucJ834CVTsJbcZk3usr62tIYFqIgU8N.","username":"admin","role":"admin","two_factor_enabled":false,"two_factor_secret":null,"two_factor_method":null,"two_factor_code":null,"two_factor_code_expires":null,"created_at":"2025-07-10T14:56:32.131Z"}}
+I/flutter (23128): 🔄 Mise à jour de l'état d'authentification...
+I/flutter (23128):    - User ID reçu (param): 1
+I/flutter (23128): 🔄 Envoi de la requête pour récupérer les infos utilisateur...
+I/flutter (23128): 🔑 Envoi du token: eyJhbGciOi...
+I/flutter (23128): 📥 Réponse reçue:
+I/flutter (23128):    - Status code: 200
+I/flutter (23128):    - Body: {"id":1,"email":"agoliagbofrijidia@gmail.com","username":"admin","role":"admin","entreprise_id":1,"two_factor_enabled":false,"two_factor_secret":null,"two_factor_method":null,"two_factor_code":null,"two_factor_code_expires":null,"created_at":"2025-07-10T14:56:32.131Z"}
+I/flutter (23128): ✅ Infos utilisateur reçues:
+I/flutter (23128):    - User ID: 1
+I/flutter (23128):    - Email: agoliagbofrijidia@gmail.com
+I/flutter (23128):    - Username: admin
+I/flutter (23128):    - Role: admin
+I/flutter (23128):    - Entreprise ID: 1
+I/flutter (23128):    - User ID (from /me): 1
+I/flutter (23128):    - Username: admin
+I/flutter (23128):    - Entreprise ID: 1
+I/flutter (23128):    - Role: admin
+I/flutter (23128): ✅ État d'authentification mis à jour
+I/flutter (23128): 🔄 Envoi de la requête pour récupérer les infos utilisateur...
+I/flutter (23128): 🔑 Envoi du token: eyJhbGciOi...
+I/flutter (23128): 📥 Réponse reçue:
+I/flutter (23128):    - Status code: 200
+I/flutter (23128):    - Body: {"id":1,"email":"agoliagbofrijidia@gmail.com","username":"admin","role":"admin","entreprise_id":1,"two_factor_enabled":false,"two_factor_secret":null,"two_factor_method":null,"two_factor_code":null,"two_factor_code_expires":null,"created_at":"2025-07-10T14:56:32.131Z"}
+I/flutter (23128): ✅ Infos utilisateur reçues:
+I/flutter (23128):    - User ID: 1
+I/flutter (23128):    - Email: agoliagbofrijidia@gmail.com
+I/flutter (23128):    - Username: admin
+I/flutter (23128):    - Role: admin
+I/flutter (23128):    - Entreprise ID: 1
+I/flutter (23128): ✅ Utilisateur connecté (Admin avec entreprise ou autre rôle), redirection vers l'accueil.
+I/flutter (23128): [API] GET http://localhost:3001/api/tag?entreprise_id=1
+I/flutter (23128): [API] Headers: {Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImVtYWlsIjoiYWdvbGlhZ2JvZnJpamlkaWFAZ21haWwuY29tIiwiaWF0IjoxNzUzODc1MzY2LCJleHAiOjE3NTM4Nzg5NjZ9.pLkUrSQWjehwZ62rI0YSlWChHgpBeNUvbGdEnnnCLXc}
+I/flutter (23128): 🔍 [DEBUG] Chargement armoires - URL: http://localhost:3001/api/armoire/1
+I/flutter (23128): 🔍 [DEBUG] Token: eyJhbGciOi...
+I/flutter (23128): 🔍 [DEBUG] EntrepriseId: 1
+I/flutter (23128): 🌐 [HTTP] GET http://localhost:3001/api/armoire/1
+I/flutter (23128): 🌐 [HTTP] Headers: {Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImVtYWlsIjoiYWdvbGlhZ2JvZnJpamlkaWFAZ21haWwuY29tIiwiaWF0IjoxNzUzODc1MzY2LCJleHAiOjE3NTM4Nzg5NjZ9.pLkUrSQWjehwZ62rI0YSlWChHgpBeNUvbGdEnnnCLXc}
+I/flutter (23128): 🔍 [DEBUG] Chargement casiers - URL: http://localhost:3001/api/casier/getcasiers
+I/flutter (23128): 🔍 [DEBUG] Token: eyJhbGciOi...
+I/flutter (23128): 🔍 [DEBUG] EntrepriseId: 1
+I/flutter (23128): 🌐 [HTTP] GET http://localhost:3001/api/casier/getcasiers
+I/flutter (23128): 🌐 [HTTP] Headers: {Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImVtYWlsIjoiYWdvbGlhZ2JvZnJpamlkaWFAZ21haWwuY29tIiwiaWF0IjoxNzUzODc1MzY2LCJleHAiOjE3NTM4Nzg5NjZ9.pLkUrSQWjehwZ62rI0YSlWChHgpBeNUvbGdEnnnCLXc}
+I/flutter (23128): [API] Response status: 200
+I/flutter (23128): [API] Response body: [{"tag_id":1,"name":"pdf","color":"#f3219d","description":"","entreprise_id":1}]
+I/flutter (23128): 🌐 [HTTP] Response Status: 200
+I/flutter (23128): 🌐 [HTTP] Response Headers: {x-powered-by: Express, connection: keep-alive, keep-alive: timeout=5, access-control-allow-origin: *, date: Wed, 30 Jul 2025 11:36:07 GMT, content-length: 181, etag: W/"b5-L8jh+7KrHPMfXPwNmJ1H54lyGiw", content-type: application/json; charset=utf-8}
+I/flutter (23128): 🌐 [HTTP] Response Body (first 200 chars): [{"armoire_id":1,"user_id":1,"sous_titre":"","nom":"Armoire 1","is_deleted":false,"created_at":"2025-07-11T16:17:47.621Z","entreprise_id":1,"version_id":0,"taille_max":"524288000"}]
+I/flutter (23128): 🔍 [DEBUG] Status: 200
+I/flutter (23128): 🔍 [DEBUG] Response body: [{"armoire_id":1,"user_id":1,"sous_titre":"","nom":"Armoire 1","is_deleted":false,"created_at":"2025...       
+I/flutter (23128): 🌐 [HTTP] Response Status: 200
+I/flutter (23128): 🌐 [HTTP] Response Headers: {x-powered-by: Express, connection: keep-alive, keep-alive: timeout=5, access-control-allow-origin: *, date: Wed, 30 Jul 2025 11:36:07 GMT, content-length: 291, etag: W/"123-zLfNKj3nULsPJhrlVZUbQJi7/ok", content-type: application/json; charset=utf-8}
+I/flutter (23128): 🌐 [HTTP] Response Body (first 200 chars): [{"cassier_id":1,"armoire_id":1,"nom":"C1","sous_titre":"","user_id":1,"is_deleted":false,"created_at":"2025-07-11T16:17:53.916Z","version_id":0},{"cassier_id":2,"armoire_id":1,"nom":"C2","sous_titre"
+I/flutter (23128): 🔍 [DEBUG] Status: 200
+I/flutter (23128): 🔍 [DEBUG] Response body: [{"cassier_id":1,"armoire_id":1,"nom":"C1","sous_titre":"","user_id":1,"is_deleted":false,"created_a...       
+D/TextSelection(23128): onUseCache cache=false
+I/flutter (23128): [API] GET http://localhost:3001/api/armoire/1
+I/flutter (23128): [API] Headers: {Content-Type: application/json, Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImVtYWlsIjoiYWdvbGlhZ2JvZnJpamlkaWFAZ21haWwuY29tIiwiaWF0IjoxNzUzODc1MzY2LCJleHAiOjE3NTM4Nzg5NjZ9.pLkUrSQWjehwZ62rI0YSlWChHgpBeNUvbGdEnnnCLXc}
+I/flutter (23128): [API] GET http://localhost:3001/api/casier/1
+I/flutter (23128): [API] Headers: {Content-Type: application/json, Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImVtYWlsIjoiYWdvbGlhZ2JvZnJpamlkaWFAZ21haWwuY29tIiwiaWF0IjoxNzUzODc1MzY2LCJleHAiOjE3NTM4Nzg5NjZ9.pLkUrSQWjehwZ62rI0YSlWChHgpBeNUvbGdEnnnCLXc}
+D/TextSelection(23128): onUseCache cache=false
+I/flutter (23128): [API] GET http://localhost:3001/api/casier/1
+I/flutter (23128): [API] Headers: {Content-Type: application/json, Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImVtYWlsIjoiYWdvbGlhZ2JvZnJpamlkaWFAZ21haWwuY29tIiwiaWF0IjoxNzUzODc1MzY2LCJleHAiOjE3NTM4Nzg5NjZ9.pLkUrSQWjehwZ62rI0YSlWChHgpBeNUvbGdEnnnCLXc}
+I/flutter (23128): Nombre de casiers à afficher : 2
+I/flutter (23128): Casier: 1 - C1
+I/flutter (23128): Casier: 2 - C2
+D/TextSelection(23128): onUseCache cache=false
+I/flutter (23128): [API] GET http://localhost:3001/api/dosier/1
+I/flutter (23128): [API] Headers: {Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImVtYWlsIjoiYWdvbGlhZ2JvZnJpamlkaWFAZ21haWwuY29tIiwiaWF0IjoxNzUzODc1MzY2LCJleHAiOjE3NTM4Nzg5NjZ9.pLkUrSQWjehwZ62rI0YSlWChHgpBeNUvbGdEnnnCLXc, Content-Type: application/json}
+I/flutter (23128): Raw response body for getDossiers: [{"dossier_id":1,"cassier_id":1,"user_id":1,"nom":"Dossier-Pro","is_deleted":false,"description":" ","created_at":"2025-07-11T16:18:13.762Z","version_id":0,"casier_nom":"C1","casier_sous_titre":""}]
+D/TextSelection(23128): onUseCache cache=false
+I/flutter (23128): DEBUG: Dossier reçu: Dossier-Pro
+I/flutter (23128): DEBUG: Dossier ID: 1
+I/flutter (23128): DEBUG: Casier ID: 1
+I/flutter (23128): DEBUG: Chargement des documents pour dossier ID: 1
+I/flutter (23128): [API] GET http://localhost:3001/api/fichier/1
+I/flutter (23128): [API] Headers: {Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImVtYWlsIjoiYWdvbGlhZ2JvZnJpamlkaWFAZ21haWwuY29tIiwiaWF0IjoxNzUzODc1MzY2LCJleHAiOjE3NTM4Nzg5NjZ9.pLkUrSQWjehwZ62rI0YSlWChHgpBeNUvbGdEnnnCLXc, Content-Type: application/json}
+I/flutter (23128): [API] GET http://localhost:3001/api/tag?entreprise_id=1
+I/flutter (23128): [API] Headers: {Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImVtYWlsIjoiYWdvbGlhZ2JvZnJpamlkaWFAZ21haWwuY29tIiwiaWF0IjoxNzUzODc1MzY2LCJleHAiOjE3NTM4Nzg5NjZ9.pLkUrSQWjehwZ62rI0YSlWChHgpBeNUvbGdEnnnCLXc}
+I/flutter (23128): DEBUG: Documents chargés: 7
+I/flutter (23128): [API] Response status: 200
+I/flutter (23128): [API] Response body: [{"tag_id":1,"name":"pdf","color":"#f3219d","description":"","entreprise_id":1}]
+I/flutter (23128): [API] GET http://localhost:3001/api/favoris/1
+I/flutter (23128): [API] Headers: {Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjEsImVtYWlsIjoiYWdvbGlhZ2JvZnJpamlkaWFAZ21haWwuY29tIiwiaWF0IjoxNzUzODc1MzY2LCJleHAiOjE3NTM4Nzg5NjZ9.pLkUrSQWjehwZ62rI0YSlWChHgpBeNUvbGdEnnnCLXc}
+
+══╡ EXCEPTION CAUGHT BY RENDERING LIBRARY ╞═════════════════════════════════════════════════════════
+The following assertion was thrown during performLayout():
+RenderFlex children have non-zero flex but incoming height constraints are unbounded.
+When a column is in a parent that does not provide a finite height constraint, for example if it is
+in a vertical scrollable, it will try to shrink-wrap its children along the vertical axis. Setting a
+flex on a child (e.g. using Expanded) indicates that the child is to expand to fill the remaining
+space in the vertical direction.
+These two directives are mutually exclusive. If a parent is to shrink-wrap its child, the child
+cannot simultaneously expand to fit its parent.
+Consider setting mainAxisSize to MainAxisSize.min and using FlexFit.loose fits for the flexible
+children (using Flexible rather than Expanded). This will allow the flexible children to size
+themselves to less than the infinite remaining space they would otherwise be forced to take, and
+then will cause the RenderFlex to shrink-wrap the children rather than expanding to fit the maximum
+constraints provided by the parent.
+If this message did not help you determine the problem, consider using debugDumpRenderTree():
+  https://flutter.dev/to/debug-render-layer
+  https://api.flutter.dev/flutter/rendering/debugDumpRenderTree.html
+The affected RenderFlex is:
+  RenderFlex#0207c relayoutBoundary=up19 NEEDS-LAYOUT NEEDS-PAINT NEEDS-COMPOSITING-BITS-UPDATE(creator: Column ← Padding ← Stack ← Padding ← DecoratedBox 
+  ← Container ← Listener ← RawGestureDetector ← GestureDetector ← Semantics ← DefaultSelectionStyle ← Builder ← ⋯, parentData: offset=Offset(0.0, 0.0) (can  use size), constraints: BoxConstraints(0.0<=w<=347.4, 0.0<=h<=Infinity), size: MISSING, direction: vertical, mainAxisAlignment: start, mainAxisSize: max,  crossAxisAlignment: start, textDirection: ltr, verticalDirection: down, spacing: 0.0)
+The creator information is set to:
+  Column ← Padding ← Stack ← Padding ← DecoratedBox ← Container ← Listener ← RawGestureDetector ←
+  GestureDetector ← Semantics ← DefaultSelectionStyle ← Builder ← ⋯
+See also: https://flutter.dev/unbounded-constraints
+If none of the above helps enough to fix this problem, please don't hesitate to file a bug:
+  https://github.com/flutter/flutter/issues/new?template=02_bug.yml
+
+The relevant error-causing widget was:
+  Column
+  Column:file:///C:/Users/KAWERU%20GROUP/test/Arkiva_App/Arkiva-main/arkiva/lib/screens/fichiers_screen.dart:1659:24
+
+When the exception was thrown, this was the stack:
+#0      RenderFlex.performLayout.<anonymous closure> (package:flutter/src/rendering/flex.dart:1250:9)
+#1      RenderFlex.performLayout (package:flutter/src/rendering/flex.dart:1253:6)
+#2      RenderObject.layout (package:flutter/src/rendering/object.dart:2766:7)
+#3      RenderPadding.performLayout (package:flutter/src/rendering/shifted_box.dart:243:12)
+#4      RenderObject.layout (package:flutter/src/rendering/object.dart:2766:7)
+#5      ChildLayoutHelper.layoutChild (package:flutter/src/rendering/layout_helper.dart:62:11)
+#6      RenderStack._computeSize (package:flutter/src/rendering/stack.dart:646:43)
+#7      RenderStack.performLayout (package:flutter/src/rendering/stack.dart:673:12)
+#8      RenderObject.layout (package:flutter/src/rendering/object.dart:2766:7)
+#9      RenderPadding.performLayout (package:flutter/src/rendering/shifted_box.dart:243:12)
+#10     RenderObject.layout (package:flutter/src/rendering/object.dart:2766:7)
+#11     RenderProxyBoxMixin.performLayout (package:flutter/src/rendering/proxy_box.dart:115:18)
+#12     RenderObject.layout (package:flutter/src/rendering/object.dart:2766:7)
+#13     RenderProxyBoxMixin.performLayout (package:flutter/src/rendering/proxy_box.dart:115:18)
+#14     RenderObject.layout (package:flutter/src/rendering/object.dart:2766:7)
+#15     RenderProxyBoxMixin.performLayout (package:flutter/src/rendering/proxy_box.dart:115:18)
+#16     RenderObject.layout (package:flutter/src/rendering/object.dart:2766:7)
+#17     RenderProxyBoxMixin.performLayout (package:flutter/src/rendering/proxy_box.dart:115:18)
+#18     RenderObject.layout (package:flutter/src/rendering/object.dart:2766:7)
+#19     RenderProxyBoxMixin.performLayout (package:flutter/src/rendering/proxy_box.dart:115:18)
+#20     RenderObject.layout (package:flutter/src/rendering/object.dart:2766:7)
+#21     RenderProxyBoxMixin.performLayout (package:flutter/src/rendering/proxy_box.dart:115:18)
+#22     RenderObject.layout (package:flutter/src/rendering/object.dart:2766:7)
+#23     RenderProxyBoxMixin.performLayout (package:flutter/src/rendering/proxy_box.dart:115:18)
+#24     RenderObject.layout (package:flutter/src/rendering/object.dart:2766:7)
+#25     RenderProxyBoxMixin.performLayout (package:flutter/src/rendering/proxy_box.dart:115:18)
+#26     RenderCustomPaint.performLayout (package:flutter/src/rendering/custom_paint.dart:574:11)
+#27     RenderObject.layout (package:flutter/src/rendering/object.dart:2766:7)
+#28     RenderProxyBoxMixin.performLayout (package:flutter/src/rendering/proxy_box.dart:115:18)
+#29     _RenderCustomClip.performLayout (package:flutter/src/rendering/proxy_box.dart:1483:11)
+#30     RenderObject.layout (package:flutter/src/rendering/object.dart:2766:7)
+#31     RenderPadding.performLayout (package:flutter/src/rendering/shifted_box.dart:243:12)
+#32     RenderObject.layout (package:flutter/src/rendering/object.dart:2766:7)
+#33     RenderProxyBoxMixin.performLayout (package:flutter/src/rendering/proxy_box.dart:115:18)
+#34     RenderObject.layout (package:flutter/src/rendering/object.dart:2766:7)
+#35     RenderProxyBoxMixin.performLayout (package:flutter/src/rendering/proxy_box.dart:115:18)
+#36     RenderObject.layout (package:flutter/src/rendering/object.dart:2766:7)
+#37     RenderProxyBoxMixin.performLayout (package:flutter/src/rendering/proxy_box.dart:115:18)
+#38     RenderObject.layout (package:flutter/src/rendering/object.dart:2766:7)
+#39     RenderSliverList.performLayout (package:flutter/src/rendering/sliver_list.dart:213:28)
+#40     RenderObject.layout (package:flutter/src/rendering/object.dart:2766:7)
+#41     RenderSliverEdgeInsetsPadding.performLayout (package:flutter/src/rendering/sliver_padding.dart:133:12)
+#42     RenderSliverPadding.performLayout (package:flutter/src/rendering/sliver_padding.dart:371:11)
+#43     RenderObject.layout (package:flutter/src/rendering/object.dart:2766:7)
+#44     RenderViewportBase.layoutChildSequence (package:flutter/src/rendering/viewport.dart:611:13)
+#45     RenderViewport._attemptLayout (package:flutter/src/rendering/viewport.dart:1592:12)
+#46     RenderViewport.performLayout (package:flutter/src/rendering/viewport.dart:1483:20)
+#47     RenderObject.layout (package:flutter/src/rendering/object.dart:2766:7)
+#48     RenderProxyBoxMixin.performLayout (package:flutter/src/rendering/proxy_box.dart:115:18)
+#49     RenderObject.layout (package:flutter/src/rendering/object.dart:2766:7)
+#50     RenderProxyBoxMixin.performLayout (package:flutter/src/rendering/proxy_box.dart:115:18)
+#51     RenderObject.layout (package:flutter/src/rendering/object.dart:2766:7)
+#52     RenderProxyBoxMixin.performLayout (package:flutter/src/rendering/proxy_box.dart:115:18)
+#53     RenderObject.layout (package:flutter/src/rendering/object.dart:2766:7)
+#54     RenderProxyBoxMixin.performLayout (package:flutter/src/rendering/proxy_box.dart:115:18)
+#55     RenderObject.layout (package:flutter/src/rendering/object.dart:2766:7)
+#56     RenderProxyBoxMixin.performLayout (package:flutter/src/rendering/proxy_box.dart:115:18)
+#57     RenderObject.layout (package:flutter/src/rendering/object.dart:2766:7)
+#58     RenderProxyBoxMixin.performLayout (package:flutter/src/rendering/proxy_box.dart:115:18)
+#59     RenderObject.layout (package:flutter/src/rendering/object.dart:2766:7)
+#60     RenderProxyBoxMixin.performLayout (package:flutter/src/rendering/proxy_box.dart:115:18)
+#61     RenderObject.layout (package:flutter/src/rendering/object.dart:2766:7)
+#62     RenderProxyBoxMixin.performLayout (package:flutter/src/rendering/proxy_box.dart:115:18)
+#63     _RenderCustomClip.performLayout (package:flutter/src/rendering/proxy_box.dart:1483:11)
+#64     RenderObject.layout (package:flutter/src/rendering/object.dart:2766:7)
+#65     ChildLayoutHelper.layoutChild (package:flutter/src/rendering/layout_helper.dart:62:11)
+#66     RenderStack._computeSize (package:flutter/src/rendering/stack.dart:646:43)
+#67     RenderStack.performLayout (package:flutter/src/rendering/stack.dart:673:12)
+#68     RenderObject.layout (package:flutter/src/rendering/object.dart:2766:7)
+#69     ChildLayoutHelper.layoutChild (package:flutter/src/rendering/layout_helper.dart:62:11)
+#70     RenderFlex._computeSizes (package:flutter/src/rendering/flex.dart:1202:26)
+#71     RenderFlex.performLayout (package:flutter/src/rendering/flex.dart:1255:32)
+#72     RenderObject.layout (package:flutter/src/rendering/object.dart:2766:7)
+#73     RenderPadding.performLayout (package:flutter/src/rendering/shifted_box.dart:243:12)
+#74     RenderObject.layout (package:flutter/src/rendering/object.dart:2766:7)
+#75     RenderProxyBoxMixin.performLayout (package:flutter/src/rendering/proxy_box.dart:115:18)
+#76     RenderObject.layout (package:flutter/src/rendering/object.dart:2766:7)
+#77     MultiChildLayoutDelegate.layoutChild (package:flutter/src/rendering/custom_layout.dart:180:12)
+#78     _ScaffoldLayout.performLayout (package:flutter/src/material/scaffold.dart:1118:7)
+#79     MultiChildLayoutDelegate._callPerformLayout (package:flutter/src/rendering/custom_layout.dart:249:7)
+#80     RenderCustomMultiChildLayoutBox.performLayout (package:flutter/src/rendering/custom_layout.dart:419:14)
+#81     RenderObject.layout (package:flutter/src/rendering/object.dart:2766:7)
+#82     RenderProxyBoxMixin.performLayout (package:flutter/src/rendering/proxy_box.dart:115:18)
+#83     RenderObject.layout (package:flutter/src/rendering/object.dart:2766:7)
+#84     RenderProxyBoxMixin.performLayout (package:flutter/src/rendering/proxy_box.dart:115:18)
+#85     _RenderCustomClip.performLayout (package:flutter/src/rendering/proxy_box.dart:1483:11)
+#86     RenderObject.layout (package:flutter/src/rendering/object.dart:2766:7)
+#87     RenderProxyBoxMixin.performLayout (package:flutter/src/rendering/proxy_box.dart:115:18)
+#88     RenderObject._layoutWithoutResize (package:flutter/src/rendering/object.dart:2614:7)
+#89     PipelineOwner.flushLayout (package:flutter/src/rendering/object.dart:1160:18)
+#90     PipelineOwner.flushLayout (package:flutter/src/rendering/object.dart:1173:15)
+#91     RendererBinding.drawFrame (package:flutter/src/rendering/binding.dart:629:23)
+#92     WidgetsBinding.drawFrame (package:flutter/src/widgets/binding.dart:1242:13)
+#93     RendererBinding._handlePersistentFrameCallback (package:flutter/src/rendering/binding.dart:495:5)
+#94     SchedulerBinding._invokeFrameCallback (package:flutter/src/scheduler/binding.dart:1438:15)
+#95     SchedulerBinding.handleDrawFrame (package:flutter/src/scheduler/binding.dart:1351:9)
+#96     SchedulerBinding._handleDrawFrame (package:flutter/src/scheduler/binding.dart:1204:5)
+#97     _invoke (dart:ui/hooks.dart:331:13)
+#98     PlatformDispatcher._drawFrame (dart:ui/platform_dispatcher.dart:444:5)
+#99     _drawFrame (dart:ui/hooks.dart:303:31)
+
+The following RenderObject was being processed when the exception was fired: RenderFlex#0207c relayoutBoundary=up19 NEEDS-LAYOUT NEEDS-PAINT
+NEEDS-COMPOSITING-BITS-UPDATE:
+  creator: Column ← Padding ← Stack ← Padding ← DecoratedBox ← Container ← Listener ←
+    RawGestureDetector ← GestureDetector ← Semantics ← DefaultSelectionStyle ← Builder ← ⋯
+  parentData: offset=Offset(0.0, 0.0) (can use size)
+  constraints: BoxConstraints(0.0<=w<=347.4, 0.0<=h<=Infinity)
+  size: MISSING
+  direction: vertical
+  mainAxisAlignment: start
+  mainAxisSize: max
+  crossAxisAlignment: start
+  textDirection: ltr
+  verticalDirection: down
+  spacing: 0.0
+This RenderObject had the following descendants (showing up to depth 5):
+    child 1: RenderFlex#f780e NEEDS-LAYOUT NEEDS-PAINT NEEDS-COMPOSITING-BITS-UPDATE
+      child 1: RenderDecoratedBox#94316 NEEDS-LAYOUT NEEDS-PAINT NEEDS-COMPOSITING-BITS-UPDATE
+        child: RenderPadding#ede70 NEEDS-LAYOUT NEEDS-PAINT NEEDS-COMPOSITING-BITS-UPDATE
+          child: RenderSemanticsAnnotations#d24d8 NEEDS-LAYOUT NEEDS-PAINT NEEDS-COMPOSITING-BITS-UPDATE
+            child: RenderExcludeSemantics#39fd6 NEEDS-LAYOUT NEEDS-PAINT NEEDS-COMPOSITING-BITS-UPDATE
+      child 2: RenderConstrainedBox#0af4e NEEDS-LAYOUT NEEDS-PAINT
+      child 3: RenderDecoratedBox#7c8b2 NEEDS-LAYOUT NEEDS-PAINT NEEDS-COMPOSITING-BITS-UPDATE
+        child: RenderPadding#6d0c6 NEEDS-LAYOUT NEEDS-PAINT NEEDS-COMPOSITING-BITS-UPDATE
+          child: RenderParagraph#2d718 NEEDS-LAYOUT NEEDS-PAINT
+            text: TextSpan
+    child 2: RenderConstrainedBox#84ac0 NEEDS-LAYOUT NEEDS-PAINT
+    child 3: RenderParagraph#dd199 NEEDS-LAYOUT NEEDS-PAINT
+      text: TextSpan
+    child 4: RenderConstrainedBox#8a058 NEEDS-LAYOUT NEEDS-PAINT
+    child 5: RenderConstrainedBox#a5dfb NEEDS-LAYOUT NEEDS-PAINT NEEDS-COMPOSITING-BITS-UPDATE
+      child: RenderDecoratedBox#36a40 NEEDS-LAYOUT NEEDS-PAINT NEEDS-COMPOSITING-BITS-UPDATE
+        child: RenderPadding#403e9 NEEDS-LAYOUT NEEDS-PAINT
+════════════════════════════════════════════════════════════════════════════════════════════════════
+
+Another exception was thrown: RenderBox was not laid out: RenderFlex#0207c relayoutBoundary=up19 NEEDS-PAINT NEEDS-COMPOSITING-BITS-UPDATE
+Another exception was thrown: RenderBox was not laid out: RenderPadding#2c09e relayoutBoundary=up18 NEEDS-PAINT NEEDS-COMPOSITING-BITS-UPDATE
+Another exception was thrown: RenderBox was not laid out: RenderStack#a459b relayoutBoundary=up17 NEEDS-PAINT NEEDS-COMPOSITING-BITS-UPDATE
+Another exception was thrown: RenderBox was not laid out: RenderPadding#401fa relayoutBoundary=up16 NEEDS-PAINT NEEDS-COMPOSITING-BITS-UPDATE
+Another exception was thrown: RenderBox was not laid out: RenderDecoratedBox#98eb2 relayoutBoundary=up15 NEEDS-PAINT NEEDS-COMPOSITING-BITS-UPDATE
+Another exception was thrown: RenderBox was not laid out: RenderPointerListener#891cb relayoutBoundary=up14 NEEDS-PAINT NEEDS-COMPOSITING-BITS-UPDATE
+Another exception was thrown: RenderBox was not laid out: RenderSemanticsAnnotations#48931 relayoutBoundary=up13 NEEDS-PAINT NEEDS-COMPOSITING-BITS-UPDATE
+Another exception was thrown: RenderBox was not laid out: RenderMouseRegion#cdc3b relayoutBoundary=up12 NEEDS-PAINT NEEDS-COMPOSITING-BITS-UPDATE
+Another exception was thrown: RenderBox was not laid out: RenderSemanticsAnnotations#4e795 relayoutBoundary=up11 NEEDS-PAINT NEEDS-COMPOSITING-BITS-UPDATE
+Another exception was thrown: RenderBox was not laid out: RenderSemanticsAnnotations#e64d9 relayoutBoundary=up10 NEEDS-PAINT NEEDS-COMPOSITING-BITS-UPDATE
+Another exception was thrown: RenderBox was not laid out: _RenderInkFeatures#c888d relayoutBoundary=up9 NEEDS-PAINT NEEDS-COMPOSITING-BITS-UPDATE
+Another exception was thrown: RenderBox was not laid out: RenderCustomPaint#ba0a8 relayoutBoundary=up8 NEEDS-PAINT NEEDS-COMPOSITING-BITS-UPDATE
+Another exception was thrown: RenderBox was not laid out: RenderPhysicalShape#df0bf relayoutBoundary=up7 NEEDS-PAINT NEEDS-COMPOSITING-BITS-UPDATE
+Another exception was thrown: RenderBox was not laid out: RenderPadding#7b572 relayoutBoundary=up6 NEEDS-PAINT NEEDS-COMPOSITING-BITS-UPDATE
+Another exception was thrown: RenderBox was not laid out: RenderSemanticsAnnotations#38eed relayoutBoundary=up5 NEEDS-PAINT NEEDS-COMPOSITING-BITS-UPDATE
+Another exception was thrown: RenderBox was not laid out: RenderRepaintBoundary#253e2 relayoutBoundary=up4 NEEDS-PAINT NEEDS-COMPOSITING-BITS-UPDATE       
+Another exception was thrown: 'package:flutter/src/rendering/sliver_multi_box_adaptor.dart': Failed assertion: line 638 pos 12: 'child.hasSize': is not
+true.
+Another exception was thrown: Null check operator used on a null value
+Another exception was thrown: Null check operator used on a null value
+Another exception was thrown: Null check operator used on a null value
+Another exception was thrown: A RenderFlex overflowed by 16 pixels on the right.
+D/VRI[MainActivity](23128): visibilityChanged oldVisibility=true newVisibility=false
+D/mali_gralloc(23128): unregister: id=3280003fe80, handle=0xb4000079f0e67340, base=0x0, importpid=23128, clone_count=0
+D/mali_gralloc(23128): unregister: id=3280003fe83, handle=0xb4000079f0e67880, base=0x0, importpid=23128, clone_count=0
+D/mali_gralloc(23128): unregister: id=3280003fe84, handle=0xb4000079f0e67960, base=0x0, importpid=23128, clone_count=0
+D/mali_gralloc(23128): unregister: id=3280003fe82, handle=0xb4000079f0e677a0, base=0x0, importpid=23128, clone_count=0
+D/mali_gralloc(23128): unregister: id=3280003fe81, handle=0xb4000079f0e676c0, base=0x0, importpid=23128, clone_count=0
+D/mali_gralloc(23128): unregister: id=3280003fe85, handle=0xb4000079f0e68220, base=0x0, importpid=23128, clone_count=0
+D/mali_gralloc(23128): unregister: id=3280003fe86, handle=0xb400007bb24df2a0, base=0x0, importpid=23128, clone_count=0
+D/mali_gralloc(23128): unregister: id=3280003fe8c, handle=0xb400007bb24df1c0, base=0x0, importpid=23128, clone_count=0
+D/mali_gralloc(23128): unregister: id=3280003fe8b, handle=0xb400007c06ddb3c0, base=0x0, importpid=23128, clone_count=0
+D/LogUtil (23128): mLogd_enable
 
 
-FAILURE: Build failed with an exception.
-
-* What went wrong:
-Execution failed for task ':app:compileFlutterBuildDebug'.
-> Process 'command 'C:\flutter\bin\flutter.bat'' finished with non-zero exit value 1
-
-* Try:
-> Run with --stacktrace option to get the stack trace.
-> Run with --info or --debug option to get more log output.
-> Run with --scan to get full insights.
-> Get more help at https://help.gradle.org.
-
-BUILD FAILED in 28s
-Running Gradle task 'assembleDebug'...                             29,1s
-Error: Gradle task assembleDebug failed with exit code 1
-
-KAWERU GROUP@DESKTOP-FVKBJHC MINGW6
