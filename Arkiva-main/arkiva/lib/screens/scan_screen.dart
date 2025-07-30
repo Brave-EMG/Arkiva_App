@@ -492,12 +492,15 @@ class _ScanScreenState extends State<ScanScreen> {
           
           SizedBox(height: ResponsiveService.getSpacing(context, baseSpacing: 24)),
           
-          // Bouton de capture
-          ResponsiveService.responsiveButton(
-            context: context,
-            onPressed: _isProcessing ? null : _captureAndProcess,
-            backgroundColor: _isProcessing ? Colors.grey : Colors.blue[600],
-            foregroundColor: Colors.white,
+          // Boutons de scan
+          Row(
+            children: [
+              Expanded(
+                child: ResponsiveService.responsiveButton(
+                  context: context,
+                  onPressed: _isProcessing ? null : _captureAndProcess,
+                  backgroundColor: _isProcessing ? Colors.grey : Colors.blue[600],
+                  foregroundColor: Colors.white,
             child: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -516,9 +519,41 @@ class _ScanScreenState extends State<ScanScreen> {
               ],
             ),
           ),
+          SizedBox(width: ResponsiveService.getSpacing(context, baseSpacing: 12)),
+          Expanded(
+            child: ResponsiveService.responsiveButton(
+              context: context,
+              onPressed: () => _launchAdobeScan(),
+              backgroundColor: Colors.green[600],
+              foregroundColor: Colors.white,
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.auto_awesome,
+                    size: ResponsiveService.getIconSize(context),
+                  ),
+                  SizedBox(width: ResponsiveService.getSpacing(context, baseSpacing: 8)),
+                  Text(
+                    'Adobe Scan',
+                    style: TextStyle(
+                      fontSize: ResponsiveService.getFontSize(context, baseSize: 16),
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
         ],
       ),
     );
+  }
+
+  void _launchAdobeScan() {
+    // TODO: Passer le dossier actuel
+    Navigator.pushNamed(context, '/adobe-scan', arguments: null);
+  }
   }
 
   @override

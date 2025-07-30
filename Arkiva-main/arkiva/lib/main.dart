@@ -9,6 +9,7 @@ import 'package:arkiva/screens/create_entreprise_screen.dart';
 import 'package:arkiva/services/theme_service.dart';
 import 'package:arkiva/services/auth_state_service.dart';
 import 'package:arkiva/screens/scan_screen.dart';
+import 'package:arkiva/screens/adobe_scan_screen.dart';
 import 'package:arkiva/screens/upload_screen.dart';
 import 'package:arkiva/services/animation_service.dart';
 import 'package:arkiva/screens/admin_dashboard_screen.dart';
@@ -50,6 +51,9 @@ class ArkivaApp extends StatelessWidget {
         '/register': (context) => const RegisterScreen(),
         '/create-entreprise': (context) => const CreateEntrepriseScreen(),
         '/scan': (context) => const ScanScreen(),
+        '/adobe-scan': (context) => AdobeScanScreen(
+          dossier: ModalRoute.of(context)!.settings.arguments as dynamic,
+        ),
         '/upload': (context) => const UploadScreen(),
         '/admin-dashboard': (context) => const AdminDashboardScreen(),
         '/backups': (context) => const BackupsScreen(),
