@@ -1,1 +1,31 @@
-cd backend && node -e "import('./src/config/database.js').then(db => db.default.query('SELECT * FROM users LIMIT 5').then(result => console.log(JSON.stringify(result.rows, null, 2))).catch(console.error))"rrr
+KAWERU GROUP@DESKTOP-FVKBJHC MINGW64 ~/test/Arkiva_App/Arkiva-main/arkiva (chabi)
+$ flutter run 
+Launching lib\main.dart on TECNO KM4 in debug mode...
+lib/services/image_processing_mobile.dart:361:27: Error: Too many positional arguments: 1 allowed, but 2 found.
+Try removing the extra positional arguments.
+    return img.convolution(image, kernel);
+                          ^
+../../../../AppData/Local/Pub/Cache/hosted/pub.dev/image-4.5.4/lib/src/filter/convolution.dart:12:7: Context: Found this candidate, but the arguments don't match.
+Image convolution(Image src,
+      ^^^^^^^^^^^
+Target kernel_snapshot_program failed: Exception
+
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':app:compileFlutterBuildDebug'.
+> Process 'command 'C:\flutter\bin\flutter.bat'' finished with non-zero exit value 1
+
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to get full insights.
+> Get more help at https://help.gradle.org.
+
+BUILD FAILED in 11s
+Running Gradle task 'assembleDebug'...                             12,4s
+Error: Gradle task assembleDebug failed with exit code 1
+
+KAWERU GROUP@DESKTOP-FVKBJHC MINGW64 ~/test/Arkiva_App/Arkiva-main/arkiva (chabi)
+$
