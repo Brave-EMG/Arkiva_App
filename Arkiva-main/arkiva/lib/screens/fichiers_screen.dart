@@ -1658,6 +1658,7 @@ class _FichiersScreenState extends State<FichiersScreen> {
                 padding: EdgeInsets.all(ResponsiveService.getCardPadding(context)),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
                   children: [
                     Row(
                       children: [
@@ -1692,7 +1693,7 @@ class _FichiersScreenState extends State<FichiersScreen> {
                       ],
                     ),
                     const SizedBox(height: 12),
-                    Expanded(
+                    Flexible(
                       child: Text(
                         document.nomOriginal ?? document.nom,
                         style: TextStyle(
@@ -1706,7 +1707,7 @@ class _FichiersScreenState extends State<FichiersScreen> {
                     ),
                     if (document.description != null && document.description!.isNotEmpty) ...[
                       const SizedBox(height: 8),
-                      Expanded(
+                      Flexible(
                         child: Text(
                           document.description!,
                           style: TextStyle(
@@ -1720,7 +1721,7 @@ class _FichiersScreenState extends State<FichiersScreen> {
                     ],
                     if (document.tags.isNotEmpty) ...[
                       const SizedBox(height: 8),
-                      Expanded(
+                      Flexible(
                         child: Wrap(
                           spacing: 4,
                           runSpacing: 4,
@@ -1924,27 +1925,6 @@ class _FichiersScreenState extends State<FichiersScreen> {
     return Column(
       children: [
         _buildModernSearchBar(),
-        // Affichage temporaire pour debug
-        if (_isLoading)
-          Container(
-            padding: const EdgeInsets.all(16),
-            child: const Center(
-              child: CircularProgressIndicator(),
-            ),
-          )
-        else
-          Container(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              children: [
-                Text('DEBUG: Dossier ID: ${widget.dossier.dossierId}'),
-                Text('DEBUG: Nom du dossier: ${widget.dossier.nom}'),
-                Text('DEBUG: Nombre de documents: ${_documents.length}'),
-                Text('DEBUG: Nombre total de documents: ${_allDocuments.length}'),
-                const SizedBox(height: 16),
-              ],
-            ),
-          ),
         Expanded(
           child: RefreshIndicator(
             onRefresh: _loadDocuments,
