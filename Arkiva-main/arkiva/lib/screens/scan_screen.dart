@@ -88,7 +88,15 @@ class _ScanScreenState extends State<ScanScreen> {
           ),
         );
         
-        // TODO: Sauvegarder l'image traitée et naviguer vers l'écran suivant
+        // Naviguer vers l'écran de prévisualisation avec l'image traitée
+        if (mounted) {
+          await Navigator.pushNamed(
+            context,
+            '/document-preview',
+            arguments: processedImage,
+          );
+        }
+        
         debugPrint('Image traitée sauvegardée: ${processedImage.path}');
       }
     } catch (e) {

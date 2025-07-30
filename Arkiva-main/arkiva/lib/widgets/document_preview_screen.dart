@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:arkiva/services/image_processing_service.dart';
 
 class DocumentPreviewScreen extends StatefulWidget {
   final File imageFile;
@@ -21,12 +22,19 @@ class _DocumentPreviewScreenState extends State<DocumentPreviewScreen> {
   String _selectedFilter = 'original';
   bool _isProcessing = false;
   bool _isImageLoaded = false;
+  final ImageProcessingService _imageProcessingService = ImageProcessingService();
 
   @override
   void initState() {
     super.initState();
     _currentFile = widget.imageFile;
     _loadImage();
+  }
+
+  @override
+  void dispose() {
+    _imageProcessingService.dispose();
+    super.dispose();
   }
 
   Future<void> _loadImage() async {
@@ -283,21 +291,37 @@ class _DocumentPreviewScreenState extends State<DocumentPreviewScreen> {
     });
 
     try {
-      // Pour l'instant, retourner simplement l'image originale
-      // Les filtres seront implémentés plus tard quand le package image sera réintégré
-      setState(() {
-        _currentFile = widget.imageFile;
-        _isProcessing = false;
-      });
+      // Utiliser le service de traitement d'image pour appliquer le filtre
+      final filteredFile = await _imageProcessingService.applyFilter(_currentFile, filter);
       
-      // Afficher un message informatif
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Filtre "$filter" non disponible pour le moment'),
-          backgroundColor: Colors.orange,
-          duration: const Duration(seconds: 2),
-        ),
-      );
+      if (filteredFile != null && await filteredFile.exists()) {
+        setState(() {
+          _currentFile = filteredFile;
+          _isProcessing = false;
+        });
+        
+        // Afficher un message de succès
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Filtre "$filter" appliqué avec succès !'),
+            backgroundColor: Colors.green,
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      } else {
+        // Si le filtre échoue, garder l'image originale
+        setState(() {
+          _isProcessing = false;
+        });
+        
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Erreur lors de l\'application du filtre "$filter"'),
+            backgroundColor: Colors.red,
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      }
       
     } catch (e) {
       debugPrint('Erreur lors de l\'application du filtre: $e');

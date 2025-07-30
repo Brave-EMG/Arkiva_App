@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -14,6 +15,7 @@ import 'package:arkiva/screens/admin_dashboard_screen.dart';
 import 'package:arkiva/screens/backups_screen.dart';
 import 'package:arkiva/screens/versions_screen.dart';
 import 'package:arkiva/screens/restorations_screen.dart';
+import 'package:arkiva/widgets/document_preview_screen.dart';
 import 'screens/payment_screen.dart';
 
 void main() {
@@ -53,6 +55,13 @@ class ArkivaApp extends StatelessWidget {
         '/backups': (context) => const BackupsScreen(),
         '/versions': (context) => const VersionsScreen(),
         '/restorations': (context) => const RestorationsScreen(),
+        '/document-preview': (context) => DocumentPreviewScreen(
+          imageFile: ModalRoute.of(context)!.settings.arguments as File,
+          onValidate: (file) {
+            // Callback pour valider le document
+            Navigator.pop(context);
+          },
+        ),
         '/payment': (context) => PaymentScreen(
           paymentId: '1', // ID de test
           authToken: 'your_test_token_here', // Token de test
