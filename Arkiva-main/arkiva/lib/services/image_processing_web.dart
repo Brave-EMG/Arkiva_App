@@ -31,6 +31,21 @@ class ImageProcessingService {
     }
   }
 
+  /// Applique un filtre à une image (compatibilité web)
+  Future<File?> applyFilter(File imageFile, String filterType) async {
+    try {
+      debugPrint('Application du filtre "$filterType" (web): ${imageFile.path}');
+      
+      // Sur le web, retourner simplement l'image d'origine
+      // car le traitement d'image nécessite des bibliothèques natives
+      debugPrint('Filtres non supportés sur le web, retour de l\'image originale');
+      return imageFile;
+    } catch (e) {
+      debugPrint('Erreur lors de l\'application du filtre "$filterType" (web): $e');
+      return imageFile;
+    }
+  }
+
   // Méthode dispose pour compatibilité
   void dispose() {
     _textRecognizer.close();
