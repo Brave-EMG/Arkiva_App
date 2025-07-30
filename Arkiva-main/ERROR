@@ -1,6 +1,29 @@
-lib/screens/home_screen.dart:1124:112: Error: Required named parameter 'dossier' must be provided.
-                    () => Navigator.push(context, MaterialPageRoute(builder: (context) => const AdobeScanScreen()))
-                                                                                                               ^
-lib/screens/adobe_scan_screen.dart:14:9: Context: Found this candidate, but the arguments don't match.
-  const AdobeScanScreen({
-        ^^^^^^^^^^^^^^^
+lib/screens/adobe_scan_screen.dart:263:29: Error: The argument type 'int?' can't be assigned to the parameter type 'int' because 'int?' is nullable and 'int' isn't.
+          dossierId: widget.dossier?.dossierId,
+                            ^
+I/flutter (14578): Nombre de casiers à afficher : 2
+I/flutter (14578): Casier: 1 - C1
+I/flutter (14578): Casier: 2 - C2
+I/flutter (14578): Nombre de casiers à afficher : 2
+I/flutter (14578): Casier: 1 - C1
+I/flutter (14578): Casier: 2 - C2
+Target kernel_snapshot_program failed: Exception
+
+
+FAILURE: Build failed with an exception.
+
+* What went wrong:
+Execution failed for task ':app:compileFlutterBuildDebug'.
+> Process 'command 'C:\flutter\bin\flutter.bat'' finished with non-zero exit value 1
+
+* Try:
+> Run with --stacktrace option to get the stack trace.
+> Run with --info or --debug option to get more log output.
+> Run with --scan to get full insights.
+> Get more help at https://help.gradle.org.
+
+BUILD FAILED in 28s
+Running Gradle task 'assembleDebug'...                             29,1s
+Error: Gradle task assembleDebug failed with exit code 1
+
+KAWERU GROUP@DESKTOP-FVKBJHC MINGW6
