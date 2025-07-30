@@ -358,7 +358,7 @@ class ImageProcessingService {
       [0.0, -1.0, 0.0]
     ];
     
-    return img.convolution(image, kernel: kernel);
+    return img.convolution(image, kernel);
   }
 
   /// Convertit une image en PDF
