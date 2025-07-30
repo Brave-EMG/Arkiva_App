@@ -127,75 +127,99 @@ class _AdobeScanScreenState extends State<AdobeScanScreen> with TickerProviderSt
   }
 
   Future<bool> _requestPermissionsWithUI() async {
-    // Vérifier d'abord les permissions actuelles
-    final cameraStatus = await Permission.camera.status;
-    final storageStatus = await Permission.storage.status;
+    try {
+      // Vérifier d'abord les permissions actuelles
+      final cameraStatus = await Permission.camera.status;
+      final storageStatus = await Permission.storage.status;
+      final photosStatus = await Permission.photos.status;
+      final videosStatus = await Permission.videos.status;
 
-    // Si les permissions sont déjà accordées
-    if (cameraStatus.isGranted && storageStatus.isGranted) {
-      return true;
-    }
+      // Si les permissions sont déjà accordées
+      final hasCamera = cameraStatus.isGranted;
+      final hasStorage = storageStatus.isGranted || photosStatus.isGranted || videosStatus.isGranted;
+      
+      if (hasCamera && hasStorage) {
+        return true;
+      }
 
-    // Afficher une boîte de dialogue pour expliquer pourquoi nous avons besoin des permissions
-    final shouldRequest = await showDialog<bool>(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => AlertDialog(
-        title: const Text('Permissions Requises'),
-        content: const Text(
-          'Cette fonctionnalité nécessite l\'accès à la caméra et au stockage pour scanner des documents. '
-          'Voulez-vous accorder ces permissions ?',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Annuler'),
+      // Afficher une boîte de dialogue pour expliquer pourquoi nous avons besoin des permissions
+      final shouldRequest = await showDialog<bool>(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => AlertDialog(
+          title: const Text('Permissions Requises'),
+          content: const Text(
+            'Cette fonctionnalité nécessite l\'accès à la caméra et au stockage pour scanner des documents.\n\n'
+            '• Caméra : Pour capturer les documents\n'
+            '• Stockage : Pour sauvegarder les documents scannés\n\n'
+            'Voulez-vous accorder ces permissions ?',
           ),
-          ElevatedButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('Autoriser'),
-          ),
-        ],
-      ),
-    );
-
-    if (shouldRequest != true) {
-      return false;
-    }
-
-    // Demander les permissions
-    final hasPermissions = await _adobeScanService.requestPermissions();
-    
-    if (!hasPermissions) {
-      // Afficher un message d'erreur si les permissions sont refusées
-      if (mounted) {
-        showDialog(
-          context: context,
-          builder: (context) => AlertDialog(
-            title: const Text('Permissions Refusées'),
-            content: const Text(
-              'Les permissions sont nécessaires pour utiliser cette fonctionnalité. '
-              'Vous pouvez les activer dans les paramètres de l\'application.',
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: const Text('Annuler'),
             ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.of(context).pop(),
-                child: const Text('OK'),
+            ElevatedButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              child: const Text('Autoriser'),
+            ),
+          ],
+        ),
+      );
+
+      if (shouldRequest != true) {
+        return false;
+      }
+
+      // Demander les permissions
+      final hasPermissions = await _adobeScanService.requestPermissions();
+      
+      if (!hasPermissions) {
+        // Afficher un message d'erreur détaillé si les permissions sont refusées
+        if (mounted) {
+          showDialog(
+            context: context,
+            builder: (context) => AlertDialog(
+              title: const Text('Permissions Refusées'),
+              content: const Text(
+                'Les permissions sont nécessaires pour utiliser cette fonctionnalité.\n\n'
+                'Pour activer les permissions :\n'
+                '1. Allez dans Paramètres > Applications\n'
+                '2. Trouvez cette application\n'
+                '3. Allez dans Permissions\n'
+                '4. Activez Caméra et Stockage',
               ),
-              ElevatedButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                  openAppSettings();
-                },
-                child: const Text('Paramètres'),
-              ),
-            ],
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(),
+                  child: const Text('OK'),
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                    openAppSettings();
+                  },
+                  child: const Text('Paramètres'),
+                ),
+              ],
+            ),
+          );
+        }
+      }
+
+      return hasPermissions;
+    } catch (e) {
+      debugPrint('Erreur lors de la demande de permissions: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Erreur lors de la demande de permissions: $e'),
+            backgroundColor: Colors.red,
           ),
         );
       }
+      return false;
     }
-
-    return hasPermissions;
   }
 
   void _startDocumentDetection() {
@@ -375,9 +399,15 @@ class _AdobeScanScreenState extends State<AdobeScanScreen> with TickerProviderSt
     return Scaffold(
       appBar: AppBar(
         title: const Text('Adobe Scan'),
-        backgroundColor: Colors.blue[600],
+        backgroundColor: Colors.green[600],
         foregroundColor: Colors.white,
         actions: [
+          // Bouton de test des permissions
+          IconButton(
+            icon: const Icon(Icons.security),
+            onPressed: _testPermissions,
+            tooltip: 'Tester les permissions',
+          ),
           if (_scannedDocuments.isNotEmpty)
             IconButton(
               icon: const Icon(Icons.upload),
@@ -698,6 +728,25 @@ class _AdobeScanScreenState extends State<AdobeScanScreen> with TickerProviderSt
         return Colors.orange;
       case ScanQuality.poor:
         return Colors.red;
+    }
+  }
+
+  void _testPermissions() async {
+    final hasPermissions = await _requestPermissionsWithUI();
+    if (hasPermissions) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Permissions accordées !'),
+          backgroundColor: Colors.green,
+        ),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Permissions refusées. Veuillez les activer dans les paramètres.'),
+          backgroundColor: Colors.red,
+        ),
+      );
     }
   }
 

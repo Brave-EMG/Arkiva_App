@@ -238,10 +238,50 @@ class AdobeScanService {
 
   /// Demande les permissions nécessaires
   Future<bool> requestPermissions() async {
-    final cameraStatus = await Permission.camera.request();
-    final storageStatus = await Permission.storage.request();
-    
-    return cameraStatus.isGranted && storageStatus.isGranted;
+    try {
+      // Permissions de base
+      final cameraStatus = await Permission.camera.request();
+      
+      // Permissions de stockage selon la version d'Android
+      PermissionStatus storageStatus;
+      
+      if (await Permission.storage.isGranted) {
+        storageStatus = PermissionStatus.granted;
+      } else {
+        // Pour Android 13+ (API 33+), utiliser les nouvelles permissions
+        if (await Permission.photos.isGranted) {
+          storageStatus = PermissionStatus.granted;
+        } else {
+          storageStatus = await Permission.photos.request();
+        }
+      }
+      
+      // Permissions supplémentaires pour Android 13+
+      PermissionStatus? mediaImagesStatus;
+      PermissionStatus? mediaVideoStatus;
+      
+      if (await Permission.photos.isDenied) {
+        mediaImagesStatus = await Permission.photos.request();
+        mediaVideoStatus = await Permission.videos.request();
+      }
+      
+      // Vérifier si toutes les permissions nécessaires sont accordées
+      final hasCamera = cameraStatus.isGranted;
+      final hasStorage = storageStatus.isGranted || 
+                        (mediaImagesStatus?.isGranted == true) || 
+                        (mediaVideoStatus?.isGranted == true);
+      
+      debugPrint('Permissions - Caméra: $hasCamera, Stockage: $hasStorage');
+      debugPrint('Camera Status: $cameraStatus');
+      debugPrint('Storage Status: $storageStatus');
+      debugPrint('Media Images Status: $mediaImagesStatus');
+      debugPrint('Media Video Status: $mediaVideoStatus');
+      
+      return hasCamera && hasStorage;
+    } catch (e) {
+      debugPrint('Erreur lors de la demande de permissions: $e');
+      return false;
+    }
   }
 
   void dispose() {
