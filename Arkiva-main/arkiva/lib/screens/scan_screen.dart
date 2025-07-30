@@ -1,11 +1,8 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:camera/camera.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:arkiva/services/image_processing_service.dart';
-import 'package:arkiva/services/animation_service.dart';
 import 'package:arkiva/services/responsive_service.dart';
-import 'package:flutter/foundation.dart' show kIsWeb;
 
 class ScanScreen extends StatefulWidget {
   const ScanScreen({super.key});
@@ -119,6 +116,11 @@ class _ScanScreenState extends State<ScanScreen> {
     }
   }
 
+  void _launchAdobeScan() {
+    // TODO: Passer le dossier actuel
+    Navigator.pushNamed(context, '/adobe-scan', arguments: null);
+  }
+
   Widget _buildMobileLayout() {
     return ResponsiveService.responsiveCard(
       context: context,
@@ -199,35 +201,11 @@ class _ScanScreenState extends State<ScanScreen> {
         // Prévisualisation de la caméra
         CameraPreview(_controller!),
         
-        // Overlay de cadrage
+        // Overlay de cadrage si activé
         if (_showOverlay)
           CustomPaint(
             painter: DocumentOverlayPainter(),
             size: Size.infinite,
-          ),
-        
-        // Indicateur de traitement
-        if (_isProcessing)
-          Container(
-            color: Colors.black54,
-            child: Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  CircularProgressIndicator(
-                    color: Colors.white,
-                  ),
-                  SizedBox(height: ResponsiveService.getSpacing(context, baseSpacing: 16)),
-                  Text(
-                    'Traitement en cours...',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: ResponsiveService.getFontSize(context, baseSize: 16),
-                    ),
-                  ),
-                ],
-              ),
-            ),
           ),
       ],
     );
@@ -235,36 +213,60 @@ class _ScanScreenState extends State<ScanScreen> {
 
   Widget _buildMobileControls() {
     return Container(
-      padding: ResponsiveService.getScreenPadding(context),
-      child: Column(
+      padding: const EdgeInsets.all(20),
+      color: Colors.grey[100],
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: [
-          // Indicateur de mode
-          Container(
-            padding: EdgeInsets.symmetric(
-              horizontal: ResponsiveService.getSpacing(context, baseSpacing: 16),
-              vertical: ResponsiveService.getSpacing(context, baseSpacing: 8),
-            ),
-            decoration: BoxDecoration(
-              color: Colors.black54,
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: Text(
-              _autoResize ? 'Mode: Redimensionnement automatique' : 'Mode: Scan simple',
-              style: TextStyle(
+          // Bouton de capture
+          GestureDetector(
+            onTap: _isProcessing ? null : _captureAndProcess,
+            child: Container(
+              width: 80,
+              height: 80,
+              decoration: BoxDecoration(
+                color: _isProcessing ? Colors.grey : Colors.blue[600],
+                shape: BoxShape.circle,
+                border: Border.all(color: Colors.white, width: 4),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.3),
+                    blurRadius: 10,
+                    offset: const Offset(0, 5),
+                  ),
+                ],
+              ),
+              child: Icon(
+                _isProcessing ? Icons.hourglass_empty : Icons.camera_alt,
                 color: Colors.white,
-                fontSize: ResponsiveService.getFontSize(context, baseSize: 12),
+                size: 40,
               ),
             ),
           ),
-          SizedBox(height: ResponsiveService.getSpacing(context, baseSpacing: 16)),
-          // Bouton de capture
-          FloatingActionButton.large(
-            onPressed: _isProcessing ? null : _captureAndProcess,
-            backgroundColor: _isProcessing ? Colors.grey : Colors.white,
-            foregroundColor: Colors.black,
-            child: Icon(
-              _isProcessing ? Icons.hourglass_empty : Icons.camera_alt,
-              size: ResponsiveService.getIconSize(context) * 1.6,
+          
+          // Bouton Adobe Scan
+          GestureDetector(
+            onTap: _launchAdobeScan,
+            child: Container(
+              width: 80,
+              height: 80,
+              decoration: BoxDecoration(
+                color: Colors.green[600],
+                shape: BoxShape.circle,
+                border: Border.all(color: Colors.white, width: 4),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.3),
+                    blurRadius: 10,
+                    offset: const Offset(0, 5),
+                  ),
+                ],
+              ),
+              child: Icon(
+                Icons.auto_awesome,
+                color: Colors.white,
+                size: 40,
+              ),
             ),
           ),
         ],
@@ -276,151 +278,24 @@ class _ScanScreenState extends State<ScanScreen> {
     return ResponsiveService.responsiveCard(
       context: context,
       child: Column(
-        children: [
-          Text(
-            'Scanner un document',
-            style: TextStyle(
-              fontSize: ResponsiveService.getFontSize(context, baseSize: 24),
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-          SizedBox(height: ResponsiveService.getSpacing(context, baseSpacing: 24)),
-          
-          // Options de scan
-          ResponsiveService.responsiveCard(
-            context: context,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Options de scan',
-                  style: TextStyle(
-                    fontSize: ResponsiveService.getFontSize(context, baseSize: 18),
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                SizedBox(height: ResponsiveService.getSpacing(context, baseSpacing: 16)),
-                
-                // Switch pour le redimensionnement automatique
-                Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        'Redimensionnement automatique',
-                        style: TextStyle(
-                          fontSize: ResponsiveService.getFontSize(context, baseSize: 16),
-                        ),
-                      ),
-                    ),
-                    Switch(
-                      value: _autoResize,
-                      onChanged: (value) {
-                        setState(() {
-                          _autoResize = value;
-                        });
-                      },
-                    ),
-                  ],
-                ),
-                
-                SizedBox(height: ResponsiveService.getSpacing(context, baseSpacing: 8)),
-                
-                // Switch pour l'overlay
-                Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        'Afficher le cadre de cadrage',
-                        style: TextStyle(
-                          fontSize: ResponsiveService.getFontSize(context, baseSize: 16),
-                        ),
-                      ),
-                    ),
-                    Switch(
-                      value: _showOverlay,
-                      onChanged: (value) {
-                        setState(() {
-                          _showOverlay = value;
-                        });
-                      },
-                    ),
-                  ],
-                ),
-              ],
-            ),
-          ),
-          
-          SizedBox(height: ResponsiveService.getSpacing(context, baseSpacing: 24)),
-          
-          // Bouton de capture
-          ResponsiveService.responsiveButton(
-            context: context,
-            onPressed: _isProcessing ? null : _captureAndProcess,
-            backgroundColor: _isProcessing ? Colors.grey : Colors.blue[600],
-            foregroundColor: Colors.white,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  _isProcessing ? Icons.hourglass_empty : Icons.camera_alt,
-                  size: ResponsiveService.getIconSize(context),
-                ),
-                SizedBox(width: ResponsiveService.getSpacing(context, baseSpacing: 8)),
-                Text(
-                  _isProcessing ? 'Traitement...' : 'Scanner le document',
-                  style: TextStyle(
-                    fontSize: ResponsiveService.getFontSize(context, baseSize: 16),
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildDesktopControls() {
-    return ResponsiveService.responsiveCard(
-      context: context,
-      child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Scanner un document',
+            'Instructions',
             style: TextStyle(
-              fontSize: ResponsiveService.getFontSize(context, baseSize: 28),
-              fontWeight: FontWeight.bold,
+              fontSize: ResponsiveService.getFontSize(context, baseSize: 18),
+              fontWeight: FontWeight.w600,
             ),
           ),
-          SizedBox(height: ResponsiveService.getSpacing(context, baseSpacing: 24)),
-          
-          // Instructions
-          ResponsiveService.responsiveCard(
-            context: context,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Instructions',
-                  style: TextStyle(
-                    fontSize: ResponsiveService.getFontSize(context, baseSize: 18),
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                SizedBox(height: ResponsiveService.getSpacing(context, baseSpacing: 12)),
-                Text(
-                  '1. Placez le document dans le cadre de cadrage\n'
-                  '2. Assurez-vous que le document est bien éclairé\n'
-                  '3. Cliquez sur "Scanner" pour capturer l\'image\n'
-                  '4. Ajustez les filtres si nécessaire',
-                  style: TextStyle(
-                    fontSize: ResponsiveService.getFontSize(context, baseSize: 14),
-                    color: Colors.grey[700],
-                  ),
-                ),
-              ],
+          SizedBox(height: ResponsiveService.getSpacing(context, baseSpacing: 12)),
+          Text(
+            '1. Placez le document dans le cadre de cadrage\n'
+            '2. Assurez-vous que le document est bien éclairé\n'
+            '3. Cliquez sur "Scanner" pour capturer l\'image\n'
+            '4. Ajustez les filtres si nécessaire',
+            style: TextStyle(
+              fontSize: ResponsiveService.getFontSize(context, baseSize: 14),
+              color: Colors.grey[700],
             ),
           ),
           
@@ -501,59 +376,60 @@ class _ScanScreenState extends State<ScanScreen> {
                   onPressed: _isProcessing ? null : _captureAndProcess,
                   backgroundColor: _isProcessing ? Colors.grey : Colors.blue[600],
                   foregroundColor: Colors.white,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  _isProcessing ? Icons.hourglass_empty : Icons.camera_alt,
-                  size: ResponsiveService.getIconSize(context),
-                ),
-                SizedBox(width: ResponsiveService.getSpacing(context, baseSpacing: 8)),
-                Text(
-                  _isProcessing ? 'Traitement...' : 'Scanner le document',
-                  style: TextStyle(
-                    fontSize: ResponsiveService.getFontSize(context, baseSize: 16),
-                    fontWeight: FontWeight.w500,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        _isProcessing ? Icons.hourglass_empty : Icons.camera_alt,
+                        size: ResponsiveService.getIconSize(context),
+                      ),
+                      SizedBox(width: ResponsiveService.getSpacing(context, baseSpacing: 8)),
+                      Text(
+                        _isProcessing ? 'Traitement...' : 'Scanner le document',
+                        style: TextStyle(
+                          fontSize: ResponsiveService.getFontSize(context, baseSize: 16),
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-              ],
-            ),
-          ),
-          SizedBox(width: ResponsiveService.getSpacing(context, baseSpacing: 12)),
-          Expanded(
-            child: ResponsiveService.responsiveButton(
-              context: context,
-              onPressed: () => _launchAdobeScan(),
-              backgroundColor: Colors.green[600],
-              foregroundColor: Colors.white,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.auto_awesome,
-                    size: ResponsiveService.getIconSize(context),
-                  ),
-                  SizedBox(width: ResponsiveService.getSpacing(context, baseSpacing: 8)),
-                  Text(
-                    'Adobe Scan',
-                    style: TextStyle(
-                      fontSize: ResponsiveService.getFontSize(context, baseSize: 16),
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ],
               ),
-            ),
+              SizedBox(width: ResponsiveService.getSpacing(context, baseSpacing: 12)),
+              Expanded(
+                child: ResponsiveService.responsiveButton(
+                  context: context,
+                  onPressed: _launchAdobeScan,
+                  backgroundColor: Colors.green[600],
+                  foregroundColor: Colors.white,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.auto_awesome,
+                        size: ResponsiveService.getIconSize(context),
+                      ),
+                      SizedBox(width: ResponsiveService.getSpacing(context, baseSpacing: 8)),
+                      Text(
+                        'Adobe Scan',
+                        style: TextStyle(
+                          fontSize: ResponsiveService.getFontSize(context, baseSize: 16),
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
           ),
         ],
       ),
     );
   }
 
-  void _launchAdobeScan() {
-    // TODO: Passer le dossier actuel
-    Navigator.pushNamed(context, '/adobe-scan', arguments: null);
-  }
+  Widget _buildDesktopControls() {
+    return _buildTabletControls();
   }
 
   @override
