@@ -1530,15 +1530,20 @@ class _FichiersScreenState extends State<FichiersScreen> {
             onPressed: () => Navigator.pop(context),
           ),
           title: Row(
+            mainAxisSize: MainAxisSize.min,
             children: [
               Icon(Icons.description, color: Colors.white, size: 24),
               const SizedBox(width: 8),
-              Text(
-                widget.dossier.nom,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 20,
+              Flexible(
+                child: Text(
+                  widget.dossier.nom,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                    fontSize: 18,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 1,
                 ),
               ),
             ],

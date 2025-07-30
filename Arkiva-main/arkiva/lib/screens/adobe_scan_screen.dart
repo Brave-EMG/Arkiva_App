@@ -7,6 +7,7 @@ import 'package:arkiva/services/upload_service.dart';
 import 'package:arkiva/models/dossier.dart';
 import 'package:arkiva/services/auth_state_service.dart';
 import 'package:provider/provider.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 class AdobeScanScreen extends StatefulWidget {
   final Dossier? dossier;
@@ -78,8 +79,8 @@ class _AdobeScanScreenState extends State<AdobeScanScreen> with TickerProviderSt
 
   Future<void> _initializeCamera() async {
     try {
-      // Demander les permissions
-      final hasPermissions = await _adobeScanService.requestPermissions();
+      // Demander les permissions avec une interface utilisateur claire
+      final hasPermissions = await _requestPermissionsWithUI();
       if (!hasPermissions) {
         throw Exception('Permissions non accordées');
       }
@@ -114,10 +115,87 @@ class _AdobeScanScreenState extends State<AdobeScanScreen> with TickerProviderSt
           SnackBar(
             content: Text('Erreur lors de l\'initialisation: $e'),
             backgroundColor: Colors.red,
+            duration: const Duration(seconds: 5),
+            action: SnackBarAction(
+              label: 'Réessayer',
+              onPressed: () => _initializeCamera(),
+            ),
           ),
         );
       }
     }
+  }
+
+  Future<bool> _requestPermissionsWithUI() async {
+    // Vérifier d'abord les permissions actuelles
+    final cameraStatus = await Permission.camera.status;
+    final storageStatus = await Permission.storage.status;
+
+    // Si les permissions sont déjà accordées
+    if (cameraStatus.isGranted && storageStatus.isGranted) {
+      return true;
+    }
+
+    // Afficher une boîte de dialogue pour expliquer pourquoi nous avons besoin des permissions
+    final shouldRequest = await showDialog<bool>(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        title: const Text('Permissions Requises'),
+        content: const Text(
+          'Cette fonctionnalité nécessite l\'accès à la caméra et au stockage pour scanner des documents. '
+          'Voulez-vous accorder ces permissions ?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Annuler'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('Autoriser'),
+          ),
+        ],
+      ),
+    );
+
+    if (shouldRequest != true) {
+      return false;
+    }
+
+    // Demander les permissions
+    final hasPermissions = await _adobeScanService.requestPermissions();
+    
+    if (!hasPermissions) {
+      // Afficher un message d'erreur si les permissions sont refusées
+      if (mounted) {
+        showDialog(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text('Permissions Refusées'),
+            content: const Text(
+              'Les permissions sont nécessaires pour utiliser cette fonctionnalité. '
+              'Vous pouvez les activer dans les paramètres de l\'application.',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('OK'),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                  openAppSettings();
+                },
+                child: const Text('Paramètres'),
+              ),
+            ],
+          ),
+        );
+      }
+    }
+
+    return hasPermissions;
   }
 
   void _startDocumentDetection() {
