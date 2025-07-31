@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:arkiva/screens/welcome_screen.dart';
 import 'package:arkiva/services/animation_service.dart';
 import 'package:arkiva/services/auth_state_service.dart';
+import 'package:arkiva/services/theme_service.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -81,63 +82,176 @@ class _SplashScreenState extends State<SplashScreen> with SingleTickerProviderSt
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.primary,
-      body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [
+              ArkivaColors.primary,
+              ArkivaColors.primaryLight,
+            ],
+          ),
+        ),
+        child: Stack(
           children: [
-            AnimatedBuilder(
-              animation: _controller,
-              builder: (context, child) {
-                return FadeTransition(
-                  opacity: _fadeAnimation,
-                  child: ScaleTransition(
-                    scale: _scaleAnimation,
-                    child: const Icon(
-                      Icons.archive_outlined,
-                      size: 100,
-                      color: Colors.white,
-                    ),
-                  ),
-                );
-              },
-            ),
-            const SizedBox(height: 24),
-            AnimatedBuilder(
-              animation: _controller,
-              builder: (context, child) {
-                return SlideTransition(
-                  position: _slideAnimation,
-                  child: FadeTransition(
-                    opacity: _fadeAnimation,
-                    child: const Text(
-                      'ARKIVA',
-                      style: TextStyle(
-                        fontSize: 32,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.white,
-                        letterSpacing: 2,
+            // Formes géométriques animées en arrière-plan
+            Positioned(
+              top: -100,
+              right: -100,
+              child: AnimatedBuilder(
+                animation: _scaleAnimation,
+                builder: (context, child) {
+                  return Transform.scale(
+                    scale: _scaleAnimation.value * 0.5,
+                    child: Container(
+                      width: 300,
+                      height: 300,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: Colors.white.withOpacity(0.05),
                       ),
                     ),
-                  ),
-                );
-              },
+                  );
+                },
+              ),
             ),
-            const SizedBox(height: 16),
-            AnimatedBuilder(
-              animation: _controller,
-              builder: (context, child) {
-                return FadeTransition(
-                  opacity: _fadeAnimation,
-                  child: const Text(
-                    'Votre solution d\'archivage intelligent',
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: Colors.white70,
+            Positioned(
+              bottom: -150,
+              left: -100,
+              child: AnimatedBuilder(
+                animation: _scaleAnimation,
+                builder: (context, child) {
+                  return Transform.scale(
+                    scale: _scaleAnimation.value * 0.3,
+                    child: Container(
+                      width: 250,
+                      height: 250,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: ArkivaColors.secondary.withOpacity(0.1),
+                      ),
                     ),
+                  );
+                },
+              ),
+            ),
+            // Contenu principal
+            Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  // Logo animé avec conteneur moderne
+                  AnimatedBuilder(
+                    animation: _controller,
+                    builder: (context, child) {
+                      return FadeTransition(
+                        opacity: _fadeAnimation,
+                        child: ScaleTransition(
+                          scale: _scaleAnimation,
+                          child: Container(
+                            width: 120,
+                            height: 120,
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(30),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.2),
+                                  blurRadius: 20,
+                                  offset: const Offset(0, 10),
+                                ),
+                              ],
+                            ),
+                            child: const Icon(
+                              Icons.archive_outlined,
+                              size: 60,
+                              color: ArkivaColors.primary,
+                            ),
+                          ),
+                        ),
+                      );
+                    },
                   ),
-                );
-              },
+                  const SizedBox(height: 32),
+                  // Titre avec nouvelle typographie
+                  AnimatedBuilder(
+                    animation: _controller,
+                    builder: (context, child) {
+                      return SlideTransition(
+                        position: _slideAnimation,
+                        child: FadeTransition(
+                          opacity: _fadeAnimation,
+                          child: Text(
+                            'ARKIVA',
+                            style: Theme.of(context).textTheme.headlineLarge?.copyWith(
+                              color: Colors.white,
+                              letterSpacing: 3,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                  const SizedBox(height: 12),
+                  // Sous-titre amélioré
+                  AnimatedBuilder(
+                    animation: _controller,
+                    builder: (context, child) {
+                      return FadeTransition(
+                        opacity: _fadeAnimation,
+                        child: Text(
+                          'Votre solution d\'archivage intelligent',
+                          style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                            color: Colors.white.withOpacity(0.9),
+                            fontWeight: FontWeight.w500,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      );
+                    },
+                  ),
+                  const SizedBox(height: 8),
+                  // Nouvelle ligne descriptive
+                  AnimatedBuilder(
+                    animation: _controller,
+                    builder: (context, child) {
+                      return FadeTransition(
+                        opacity: _fadeAnimation,
+                        child: Text(
+                          'Organisez • Numérisez • Sécurisez',
+                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            color: Colors.white.withOpacity(0.7),
+                            letterSpacing: 1,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      );
+                    },
+                  ),
+                  const SizedBox(height: 60),
+                  // Indicateur de chargement moderne
+                  AnimatedBuilder(
+                    animation: _fadeAnimation,
+                    builder: (context, child) {
+                      return FadeTransition(
+                        opacity: _fadeAnimation,
+                        child: SizedBox(
+                          width: 40,
+                          height: 40,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 3,
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              Colors.white.withOpacity(0.8),
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ],
+              ),
             ),
           ],
         ),
